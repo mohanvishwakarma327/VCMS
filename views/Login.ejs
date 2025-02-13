@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login to VCNow</title>
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+    <form action="/login" method="POST">
+        <div>
+            <h2>Login to VCNow</h2>
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" placeholder="Enter your email" required><br><br>
+            
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" placeholder="Enter your password" required><br><br>
+            
+            <button type="submit">Login</button>
+            <br><br>
+            
+            <p>Don't have an account? <a href="/signup">Sign Up</a></p>
+        </div>
+    </form>
+</body>
+<script src="index.js"></script>
+</html>

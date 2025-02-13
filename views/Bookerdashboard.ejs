@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCNow - Book a VC Session</title>
+    <link rel="stylesheet" href="/css/booker.css">
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active-section'));
+            document.getElementById(sectionId).classList.add('active-section');
+        }
+    </script>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <img src="/css/img/vcn.png" alt="VCNow Logo">
+        <h1>VCNow - Book a VC Session</h1>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <a href="#" onclick="showSection('bookVC')">Book New VC</a>
+        <a href="#" onclick="showSection('confirmVC')">Find/Confirm VC</a>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </nav>
+
+    <!-- BOOKING FORM -->
+    <div class="container section active-section" id="bookVC">
+        <h2>Book a VC Session</h2>
+        <form action="/Bookerdashboard" method="post">
+            <label for="companyName">Company Name:</label>
+            <input type="text" name="companyName" required>
+
+            <label for="chairperson">Chairperson:</label>
+            <input type="text" name="chairperson" required>
+
+            <label for="contactNumber">Contact Number:</label>
+            <input type="tel" name="contactNumber" required>
+
+            <label for="email">Email:</label>
+            <input type="email" name="email" required>
+
+            <label for="vcPurpose">VC Purpose:</label>
+            <select name="vcPurpose" required>
+            <option value="">-- Select Purpose --</option>
+            <option value="business_meeting">Business Meeting</option>
+            <option value="training_session">Training Session</option>
+            <option value="client_meeting">Client Meeting</option>
+            <option value="team_meeting">Team Meeting</option>
+            <option value="interview">Interview</option>
+            <option value="presentation">Presentation</option>
+            <option value="other">Other</option>
+            </select>
+
+            <label for="remark">Remark:</label>
+            <textarea name="remark" rows="3"></textarea>
+
+            <label for="vcDuration">VC Duration:</label>
+            <input type="number" name="vcDuration" min="0.5" step="0.5" required>
+
+
+            <label for="vcType">VC Type:</label>
+            <select name="vcType" required>
+                <option value="audio">Audio</option>
+                <option value="video">Video</option>
+                <option value="hybrid">Both</option>
+            </select>
+
+            <label for="vcStartDate">VC Start Date:</label>
+            <input type="datetime-local" name="vcStartDate" required>
+
+            <label for="vcEndDate">VC End Date:</label>
+            <input type="datetime-local" name="vcEndDate" required>
+
+            <label for="recording">Recording Required:</label>
+            <select name="recording" required>
+                <option value="Select">Choose</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+
+            <label for="billingSection">Billing Section:</label>
+            <select name="billingSection" required>
+                <option value="Select">Choose</option>
+                <option value="prepaid">Prepaid</option>
+                <option value="postpaid">Postpaid</option>
+            </select>
+
+            <button type="submit">Book VC Session</button>
+        </form>
+    </div>
+
+   <!-- CONFIRMATION SECTION -->
+<div class="container section" id="confirmVC">
+    <h2>Find/Confirm VC Session</h2>
+    <table border="1">
+        <tr>
+            <th>Company</th>
+            <th>Chairperson</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+        </tr>
+        <% if (typeof vcSessions !== 'undefined' && vcSessions.length > 0) { %>
+        <% vcSessions.forEach(session => { %>
+        <tr>
+            <td><%= session.companyName %></td>
+            <td><%= session.chairperson %></td>
+            <td><%= session.vcStartDate %></td>
+            <td><%= session.vcEndDate %></td>
+        </tr>  <!-- ✅ Properly closing the <tr> -->
+        <% }) %>
+        <% } else { %>
+        <tr>
+            <td colspan="4">No VC sessions found.</td>
+        </tr>
+        <% } %>
+    </table>
+</div>
+
+
+
+    <div class="footer">
+        <p>Powered by VCNow &copy; 2025. All rights reserved.</p>
+    </div>
+</body>
+</html>

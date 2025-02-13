@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Creation</title>
+    <link rel="stylesheet" href="/css/add-user.css">
+    <script defer>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userForm = document.getElementById('userForm');
+
+            userForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                const userGroup = document.getElementById('userGroup').value;
+                const circle = document.getElementById('circle').value;
+                const username = document.getElementById('username').value;
+                const loginIdPrefix = document.getElementById('loginId').value;
+                const email = document.getElementById('email').value;
+                const mobileNumber = document.getElementById('mobileNumber').value;
+                const status = document.getElementById('status').value;
+
+                // Combine prefix and email for login ID
+                const loginId = `${loginIdPrefix} ${email}`;
+
+                // Validate form data
+                if (!userGroup || !username || !email || !mobileNumber || !status) {
+                    alert('Please fill in all required fields.');
+                    return;
+                }
+
+                // Create user object
+                const userData = {
+                    userGroup,
+                    circle,
+                    username,
+                    loginId,
+                    mobileNumber,
+                    status,
+                };
+
+                // Simulate sending data to the backend
+                fetch('/manage/add_user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData),
+                })
+                    .then((response) => response.text())
+                    .then((message) => {
+                        alert(message || 'User created successfully!');
+                        userForm.reset();
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        alert('An error occurred while creating the user.');
+                    });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>User Creation</h1>
+        <form id="userForm">
+            <label for="userGroup">User Group</label>
+            <select id="userGroup" name="userGroup" required>
+                <option value="">Please Select</option>
+                <option value="Admin">Admin</option>
+                <option value="Store">Store</option>
+                <option value="Vnoc">Vnoc</option>
+            </select>
+
+            <label for="circle">Store</label>
+            <select id="circle" name="circle" required>
+                <option value="">Please Select</option>
+                <option value="Vashi">Vashi</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Andheri">Andheri</option>
+                <option value="Gurugram">Gurugram</option>
+                <option value="Indore">Indore</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="none">None</option>
+            </select>
+
+            <label for="username">User Name</label>
+            <!-- <input type="text" id="username" name="username" required> -->
+
+            <!-- <label for="loginId">We See @ Login ID</label>
+            <select id="loginId" name="loginId" required>
+                <option value="">Please Select</option>
+                <option value="Mr">Mr</option>
+                <option value="Ms">Ms</option>
+            </select> -->
+            <input type="email" id="email" name="email" placeholder="[Enter your valid e-mail ID as Login ID]" required>
+
+            <label for="mobileNumber">Mobile Number</label>
+            <input type="text" id="mobileNumber" name="mobileNumber" required>
+
+            <label for="status">Status</label>
+            <select id="status" name="status" required>
+                <option value="">Please Select</option>
+                <option value="active">Active</option>
+                <option value="inactive">Hold</option>
+            </select>
+
+            <div class="buttons">
+                <input type="submit" value="Submit">
+                <input type="reset" value="Reset">
+            </div>
+        </form>
+    </div>
+</body>
+</html>

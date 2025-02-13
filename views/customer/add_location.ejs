@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Location</title>
+    <link rel="stylesheet" href="/location-config.css">
+</head>
+<body>
+    <h1>Add Location</h1>
+    <div class="form-container">
+        <form id="locationForm">
+            <h2>Add Location</h2>
+            <label for="locationName">Location Name:</label>
+            <input type="text" id="locationName" name="locationName" required><br>
+
+            <label for="locationAddress">Location Address:</label>
+            <input type="text" id="locationAddress" name="locationAddress" required><br>
+
+            <label for="locationCity">City:</label>
+            <input type="text" id="locationCity" name="locationCity" required><br>
+
+            <label for="locationState">State:</label>
+            <input type="text" id="locationState" name="locationState" required><br>
+
+            <label for="locationZip">ZIP Code:</label>
+            <input type="text" id="locationZip" name="locationZip" required><br>
+
+            <label for="locationCountry">Country:</label>
+            <input type="text" id="locationCountry" name="locationCountry" required><br>
+
+            <input type="submit" value="Add Location">
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('locationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            // Collect form data
+            const locationData = {
+                locationName: document.getElementById('locationName').value,
+                locationAddress: document.getElementById('locationAddress').value,
+                locationCity: document.getElementById('locationCity').value,
+                locationState: document.getElementById('locationState').value,
+                locationZip: document.getElementById('locationZip').value,
+                locationCountry: document.getElementById('locationCountry').value,
+            };
+
+            try {
+                // Send data to the backend
+                const response = await fetch('http://127.0.0.1:5000/locations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(locationData),
+                });
+                
+                
+
+                if (response.ok) {
+                    alert('Location added successfully!');
+                } else {
+                    alert('Failed to add location. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while saving the location.');
+            }
+        });
+    </script>
+</body>
+</html>

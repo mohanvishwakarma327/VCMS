@@ -1,0 +1,37 @@
+<!-- <?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <system.webServer>
+    Specify the Node.js application entry script
+    <handlers>
+      <add name="iisnode" path="index.js" verb="*" modules="iisnode" resourceType="Unspecified"/>
+    </handlers>
+
+    Prevent serving of sensitive files like node_modules and web.config
+    <security>
+      <requestFiltering>
+        <hiddenSegments>
+          <add segment="node_modules"/>
+          <add segment="web.config"/>
+        </hiddenSegments>
+      </requestFiltering>
+    </security>
+  
+    Configure iisnode settings
+    <iisnode watchedFiles="*.js;*.json" loggingEnabled="true" debugEnabled="true" />
+    
+    Add static content support for EJS, JS, and CSS
+    <staticContent>
+      <mimeMap fileExtension=".ejs" mimeType="text/html" />
+      <mimeMap fileExtension=".js" mimeType="application/javascript" />
+      <mimeMap fileExtension=".css" mimeType="text/css" />
+      <mimeMap fileExtension=".json" mimeType="application/json" />
+    </staticContent>
+    
+    Optionally: Set the default document
+    <defaultDocument>
+      <files>
+        <add value="home.ejs" />
+      </files>
+    </defaultDocument>
+  </system.webServer>
+</configuration> -->

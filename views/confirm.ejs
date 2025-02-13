@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VC Confirmation</title>
+    <link rel="stylesheet" href="/css/confirmation.css">
+</head>
+<body>
+    <!-- ✅ Header -->
+    <header class="header">
+        <h1>Video Conference Confirmation</h1>
+    </header>
+
+    <!-- ✅ Navigation Bar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="/newBookings">New Bookings</a></li>
+            <li class="reports">
+                <a href="#">Reports</a>
+                <ul class="dropdown">
+                    <li><a href="/reports/clientreport">Client Reports</a></li>
+                    <li><a href="/reports/dailyreport">Daily Reports</a></li>
+                </ul>
+            </li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    
+
+    <div class="container">
+        <h2>Confirm VC Booking</h2>
+        <div id="bookingDetails"></div>
+        
+        <!-- ✅ Joining Link Section -->
+        <div class="joining-link">
+            <label for="joinLink"><strong>Provide Joining Link:</strong></label>
+            <textarea id="joinLink" placeholder="Enter Meeting Link Here"></textarea>
+        </div>
+
+        <div class="buttons">
+            <button id="approveBtn" class="approve">Approve</button>
+            <button id="rejectBtn" class="reject">Reject</button>
+        </div>
+    </div>
+
+    <!-- ✅ Footer -->
+    <footer class="footer">
+        <p>© 2025 VCNow | All Rights Reserved</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch("/getNewBooking");
+                const booking = await response.json();
+                if (booking) {
+                    document.getElementById("bookingDetails").innerHTML = `
+                        <p><strong>Company Name:</strong> ${booking.company_name}</p>
+                        <p><strong>Chairperson:</strong> ${booking.chairperson}</p>
+                        <p><strong>Contact Number:</strong> ${booking.contact_number}</p>
+                        <p><strong>Email:</strong> ${booking.email}</p>
+                        <p><strong>VC Purpose:</strong> ${booking.vc_purpose}</p>
+                        <p><strong>Department:</strong> ${booking.department}</p>
+                        <p><strong>VC Duration:</strong> ${booking.vc_duration} hours</p>
+                        <p><strong>VC Type:</strong> ${booking.vc_type}</p>
+                        <p><strong>VC Start Date:</strong> ${booking.vc_start_date}</p>
+                        <p><strong>VC End Date:</strong> ${booking.vc_end_date}</p>
+                        <p><strong>Recording Required:</strong> ${booking.recording}</p>
+                        <p><strong>Billing Section:</strong> ${booking.billing_section}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error fetching booking data:", error);
+            }
+        });
+
+        document.getElementById("approveBtn").addEventListener("click", async () => {
+            await sendDecision("Approved");
+        });
+
+        document.getElementById("rejectBtn").addEventListener("click", async () => {
+            await sendDecision("Rejected");
+        });
+
+        async function sendDecision(status) {
+            try {
+                const joinLink = document.getElementById("joinLink").value.trim();
+                const response = await fetch("/confirmNewBooking", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id: 1,  // Replace with actual booking ID from fetched data
+                        status,
+                        joinLink
+                    })
+                });
+                if (response.ok) {
+                    alert(`VC booking has been ${status}.`);
+                } else {
+                    alert("Error processing request.");
+                }
+            } catch (error) {
+                console.error("Error sending confirmation:", error);
+            }
+        }
+    </script>
+</body>
