@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCNow Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="/css/img/vcn.png" alt="VCNow Logo" class="logo">
+            <h1 class="title">Admin Dashboard</h1>
+        </header>
+        
+        <nav class="menu">
+            <div class="dropdown">
+                <a href="#">Customer ▼</a>
+                <div class="dropdown-content">
+                    <a href="/customer/clients">Add Client</a>
+                    <a href="/customer/add_location">Add Location</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#">Manage User ▼</a>
+                <div class="dropdown-content">
+                    <a href="/manageuser/add_user">Add User</a>
+                    <a href="/manageuser/delete_user">Delete User</a> 
+                    <a href="/manageuser/reset_user">Reset User</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#">Reports ▼</a>
+                <div class="dropdown-content">
+                    <a href="/reports/clientreport">Client Reports</a>
+                    <a href="/reports/dailyreport">Daily Report</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#">Account ▼</a>
+                <div class="dropdown-content">
+                    <a href="/account/account">My Account</a>
+                </div>
+            </div>    
+            <div class="user-info">
+                <span id="userEmail"><%= user ? user.email : '' %></span>
+            </div> 
+            <a href="/login" class="signoff-btn">Sign Off</a>     
+        </nav>
+
+        <!-- Display Users from the Database -->
+        <div class="content">
+            <h2>Registered Users</h2>
+            <table border="1">
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                </tr>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.id %></td>
+                        <td><%= user.username %></td>
+                        <td><%= user.email %></td>
+                    </tr>
+                <% }) %>
+            </table>
+        </div>
+
+        <footer class="footer">
+            <p>Powered by Your Company</p>
+            <p>Copyrights © 2014. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

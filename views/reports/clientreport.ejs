@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports</title>
+    <link rel="stylesheet" href="/css/clientreport.css">
+</head>
+<body>
+    <div class="container">
+        <form id="clientReportsForm">
+            <h2>Client Reports</h2>
+            <label for="clientId">Client ID:</label>
+            <input type="text" id="clientId" name="clientId" required><br>
+            
+            <label for="clientReportDateRange">Date Range:</label>
+            <input type="text" id="clientReportDateRange" name="clientReportDateRange" placeholder="e.g., 2024-01-01 to 2024-01-31" required><br>
+            
+            <input type="submit" value="Get Client Report">
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('clientReportsForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const clientId = document.getElementById('clientId').value;
+            const dateRange = document.getElementById('clientReportDateRange').value;
+
+            // Validate input
+            if (!clientId || !dateRange) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            // Fetch client report
+            fetch('/getClientReport', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId, dateRange }),
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json(); // Assuming server returns JSON data
+                    }
+                    throw new Error('Failed to fetch client report');
+                })
+                .then((data) => {
+                    // Handle successful response
+                    console.log('Report Data:', data);
+                    alert('Report fetched successfully! Check the console for details.');
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('An error occurred while fetching the report.');
+                });
+        });
+    </script>
+</body>
+</html>

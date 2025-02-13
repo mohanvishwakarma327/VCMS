@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports</title>
+    <link rel="stylesheet" href="/css/clientreport.css">
+</head>
+<body>
+    <h1>Reports</h1>
+    <div class="form-container">
+        <form id="dailyReportsForm">
+            <h2>Daily Reports</h2>
+            <label for="dailyReportDate">Select Date:</label>
+            <input type="date" id="dailyReportDate" name="dailyReportDate" required><br>
+            <input type="submit" value="Get Daily Report">
+        </form>
+    </div>
+<script>
+        document.getElementById('dailyReportsForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            alert('Fetching daily report for ' + document.getElementById('dailyReportDate').value);
+        });
+
+        document.getElementById('clientReportsForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            alert('Fetching client report for Client ID: ' + document.getElementById('clientId').value + ' for Date Range: ' + document.getElementById('clientReportDateRange').value);
+        });
+    </script>
+</body>
+</html>

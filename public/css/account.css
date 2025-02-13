@@ -1,0 +1,50 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.account-container {
+    width: 50%;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.account-details {
+    margin-bottom: 20px;
+}
+
+.account-details h2 {
+    margin-bottom: 10px;
+    color: #4396CA;
+}
+
+.account-details p {
+    font-size: 18px;
+    color: #555;
+}
+
+.account-actions .button {
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #4396CA;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.account-actions .button:hover {
+    background-color: #367ba6;
+}

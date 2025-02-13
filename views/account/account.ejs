@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Account</title>
+    <link rel="stylesheet" href="/css/account.css">
+</head>
+<body>
+    <h1>Admin Account</h1>
+    <div class="account-container">
+        <div class="account-details">
+            <h2>My Account</h2>
+            <p><strong>Email:</strong> <span id="email">Loading...</span></p>
+        </div>
+        <div class="account-actions">
+            <!-- <a href="myaccount.html" class="button">My Account</a> -->
+            <a href="/logout" class="button">Logout</a>
+        </div>
+    </div>
+
+    <script>
+        // Fetch logged-in user details from the server
+        fetch('/getUser')
+            .then(response => response.json())
+            .then(data => {
+                if (data.user) {
+                    document.getElementById('email').innerText = data.user.email;
+                } else {
+                    document.getElementById('email').innerText = "Not logged in";
+                }
+            })
+            .catch(error => console.error('Error fetching user data:', error));
+    </script>
+</body>
+</html>

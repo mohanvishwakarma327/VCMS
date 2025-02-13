@@ -1,0 +1,128 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    text-align: center;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f4f4f5;
+    color: rgb(16, 120, 231);
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.logo {
+    height: 50px;
+}
+
+.title {
+    margin-left: 15px;
+}
+
+/* Navigation Menu */
+.menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #343a40;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.menu a {
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    transition: 0.3s;
+}
+
+.menu a:hover {
+    background: #007bff;
+    border-radius: 5px;
+}
+
+.user-info {
+    display: inline-block;
+    margin-right: 100px;
+    font-weight: bold;
+    color: #fff;
+}
+
+
+/* Dropdown Menu */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: white;
+    min-width: 160px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 10px;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content a:hover {
+    background: #007bff;
+    color: white;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Sign Off Button */
+.signoff-btn {
+    background: rgb(16, 120, 231);;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-left: auto;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.signoff-btn:hover {
+    background: darkred;
+}
+
+/* Content */
+.portal-img {
+    width: 80%;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+/* Footer */
+.footer {
+    margin-top: 20px;
+    background: #222;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+}

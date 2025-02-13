@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Users</title>
+    <link rel="stylesheet" href="/css/reset-user.css">
+</head>
+<body>
+    <div class="container">
+        <form id="resetUserForm">
+            <h2>Reset User Password</h2>
+            <label for="resetUserName">User Name:</label>
+            <input type="text" id="resetUserName" name="resetUserName" required><br>
+
+            <label for="resetUserPassword">New Password:</label>
+            <input type="password" id="resetUserPassword" name="resetUserPassword" required><br>
+
+            <input type="submit" value="Reset Password">
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('resetUserForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const userName = document.getElementById('resetUserName').value;
+            const newPassword = document.getElementById('resetUserPassword').value;
+
+            // Validate form inputs
+            if (!userName || !newPassword) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            // Send data to the backend
+            fetch('/resetPassword', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userName, newPassword }),
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        return response.text();
+                    }
+                    throw new Error('Failed to reset password');
+                })
+                .then((message) => {
+                    alert(message || 'Password reset successfully!');
+                    document.getElementById('resetUserForm').reset();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('An error occurred while resetting the password.');
+                });
+        });
+    </script>
+</body>
+</html>
