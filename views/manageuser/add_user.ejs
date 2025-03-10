@@ -4,57 +4,82 @@
     <meta charset="UTF-8">
     <title>User Creation</title>
     <link rel="stylesheet" href="/css/add-user.css">
+ 
     <script defer>
         document.addEventListener('DOMContentLoaded', () => {
             const userForm = document.getElementById('userForm');
-
+        
+            if (!userForm) {
+                console.error("❌ Form not found! Check your HTML.");
+                return;
+            }
+        
+            console.log("✅ Form found, attaching event listener...");
+        
             userForm.addEventListener('submit', (event) => {
-                event.preventDefault();
-
+                event.preventDefault(); // Prevent default form submission
+        
                 const userGroup = document.getElementById('userGroup').value;
                 const circle = document.getElementById('circle').value;
                 const username = document.getElementById('username').value;
-                const loginIdPrefix = document.getElementById('loginId').value;
                 const email = document.getElementById('email').value;
-                const mobileNumber = document.getElementById('mobileNumber').value;
+                const phone = document.getElementById('mobileNumber').value;  // ✅ Updated field name
                 const status = document.getElementById('status').value;
-
-                // Combine prefix and email for login ID
-                const loginId = `${loginIdPrefix} ${email}`;
-
-                // Validate form data
-                if (!userGroup || !username || !email || !mobileNumber || !status) {
-                    alert('Please fill in all required fields.');
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+        
+                console.log("📋 Collected form data:", { userGroup, circle, username, email, phone, status });
+        
+                if (!userGroup || !username || !email || !phone || !status || !password || !confirmPassword) {
+                    alert('⚠️ Please fill in all required fields.');
                     return;
                 }
-
-                // Create user object
-                const userData = {
-                    userGroup,
-                    circle,
+        
+                if (password !== confirmPassword) {
+                    alert('⚠️ Passwords do not match.');
+                    return;
+                }
+        
+                // ✅ Correct field names as expected by backend
+                const userData = { 
+                    user_group: userGroup,  // ✅ Renamed
+                    store: circle,          // ✅ Renamed
                     username,
-                    loginId,
-                    mobileNumber,
+                    email,
+                    phone,                  // ✅ Corrected
                     status,
+                    password 
                 };
-
-                // Simulate sending data to the backend
-                fetch('/manage/add_user', {
+        
+                fetch('/manageuser/add_user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userData),
                 })
-                    .then((response) => response.text())
-                    .then((message) => {
-                        alert(message || 'User created successfully!');
-                        userForm.reset();
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                        alert('An error occurred while creating the user.');
-                    });
+                .then(response => {
+                    if (response.status === 409) {
+                        throw new Error("User already exists.");
+                    }
+                    if (!response.ok) {
+                        throw new Error(`HTTP Error! Status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(message => {
+                    console.log("✅ Server Response:", message);
+                    alert(message || 'User created successfully!');
+                    userForm.reset();
+                })
+                .catch(error => {
+                    console.error("❌ Error:", error);
+                    if (error.message === "User already exists.") {
+                        alert("⚠️ User already exists. Please use a different email or username.");
+                    } else {
+                        alert('An error occurred while creating the user. Please try again.');
+                    }
+                });
             });
-        });
+        });        
     </script>
 </head>
 <body>
@@ -83,15 +108,10 @@
             </select>
 
             <label for="username">User Name</label>
-            <!-- <input type="text" id="username" name="username" required> -->
+            <input type="text" id="username" name="username" required>
 
-            <!-- <label for="loginId">We See @ Login ID</label>
-            <select id="loginId" name="loginId" required>
-                <option value="">Please Select</option>
-                <option value="Mr">Mr</option>
-                <option value="Ms">Ms</option>
-            </select> -->
-            <input type="email" id="email" name="email" placeholder="[Enter your valid e-mail ID as Login ID]" required>
+            <label for="email">Email (Login ID)</label>
+            <input type="email" id="email" name="email" placeholder="Enter your valid email" required>
 
             <label for="mobileNumber">Mobile Number</label>
             <input type="text" id="mobileNumber" name="mobileNumber" required>
@@ -102,6 +122,13 @@
                 <option value="active">Active</option>
                 <option value="inactive">Hold</option>
             </select>
+
+            <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+
+            <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter password" required>
+
 
             <div class="buttons">
                 <input type="submit" value="Submit">

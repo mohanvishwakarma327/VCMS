@@ -12,7 +12,7 @@
             <img src="/css/img/vcn.png" alt="VCNow Logo" class="logo">
             <h1 class="title">Admin Dashboard</h1>
         </header>
-        
+
         <nav class="menu">
             <div class="dropdown">
                 <a href="#">Customer ▼</a>
@@ -42,29 +42,47 @@
                     <a href="/account/account">My Account</a>
                 </div>
             </div>    
+
+            <div class="dropdown">
+                <a href="#">Users ▼</a>
+                <div class="dropdown-content">
+                    <a href="/manageuser/">View Users</a> <!-- Updated Link -->
+                    <a href="/users/assignuser">Assign User</a>
+                </div>
+            </div>
+            
             <div class="user-info">
-                <span id="userEmail"><%= user ? user.email : '' %></span>
-            </div> 
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <span id="userEmail"><%= user.email %></span>
+                <% } else { %>
+                    <span id="userEmail">Guest</span>
+                <% } %>
+            </div>      
+                    
             <a href="/login" class="signoff-btn">Sign Off</a>     
         </nav>
 
         <!-- Display Users from the Database -->
         <div class="content">
             <h2>Registered Users</h2>
-            <table border="1">
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                </tr>
-                <% users.forEach(user => { %>
+            <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                <table border="1">
                     <tr>
-                        <td><%= user.id %></td>
-                        <td><%= user.username %></td>
-                        <td><%= user.email %></td>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
                     </tr>
-                <% }) %>
-            </table>
+                    <% users.forEach(user => { %>
+                        <tr>
+                            <td><%= user._id %></td>
+                            <td><%= user.username %></td>
+                            <td><%= user.email %></td>
+                        </tr>
+                    <% }) %>
+                </table>
+            <% } else { %>
+                <p>No registered users found.</p>
+            <% } %>          
         </div>
 
         <footer class="footer">

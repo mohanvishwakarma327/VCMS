@@ -1,306 +1,384 @@
-const express = require('express');
+const express = require('express'); 
 const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
+require("dotenv").config(); // Load .env file
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
-const nodemailer = require('nodemailer'); // Nodemailer for email sending
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const authRoutes = require('./routes/auth');
+const mongoose = require("mongoose"); // ✅ Correct
+const manageUserRoutes = require("./routes/manageUser");
+const MONGO_URI = process.env.MONGO_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
+const router = express.Router();
+const addUserRoute = require('./routes/add_user'); 
+const userRoutes = require('./routes/userRoutes');
+const User = require('./models/user'); // Import User model
+const dotenv = require("dotenv");
+
 
 const app = express();
-const port = 5501;
+const PORT = process.env.PORT || 5502;
 
-// MySQL Connection
+// ✅ MySQL Database Connection
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'Mohansanty@7', // Replace with your MySQL password
+    password: 'Mohansanty@7',
     database: 'vcms'
-});
+}); 
 
-db.connect(err => {
-    if (err) console.error("❌ Database connection failed:", err);
-    else console.log("✅ Connected to MySQL Database");
-});
+// Convert to Promise-based queries
+console.log("MONGO_URI from .env:", process.env.MONGO_URI);
+mongoose .connect('mongodb://localhost:27017/vcms', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => console.log("✅ MongoDB connected successfully!"))
+    .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Middleware
-app.use(cors()); // Allow frontend requests
-app.use(express.static(path.join(__dirname, '/public')));
-app.use(express.static(path.join(__dirname, '/css')));
+
+
+//Routes
+app.use("/auth", require("./routes/auth")); // Ensure this path is correct
+
+
+// ✅ Middleware
+app.use('/', authRoutes);
+app.use('/views/manageuser', userRoutes);
+// const userRoutes = require('./routes/userRoutes');
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+dotenv.config();
 
-// Session Middleware
+// ✅ Session Middleware
 app.use(session({
-    secret: 'vcnow-secret-key',
+    secret: 'a3f9b17c9e9a7b7d8e6c4a3f2e7b1c9a',
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }
 }));
 
-// ✅ LOGIN SYSTEM ✅
-
-// Login Page
-app.get('/login', (_, res) => {
-    res.render('login');
+app.post('/forgot-password', (req, res) => {
+    res.json({ message: 'Forgot password route working!' });
 });
 
-// Signup Page
-app.get('/signup', (_, res) => {
-    res.render('signup');
+// ✅ LOGIN SYSTEM
+app.get('/login', (_, res) => 
+    res.render('login'));
+//confirm page
+app.get('/confirm', (_, res) => 
+    res.render('confirm'));
+//forget-password
+app.get('/forget-password', (_, res) => 
+    res.render('forget-password'));
+//admin-page
+app.get('/admin', (_, res) => 
+    res.render('admin'));
+//customer/clients
+app.get('/customer/clients', (_, res) => 
+    res.render('customer/clients'));
+//customer/location
+app.get('/customer/add_location', (_, res) => 
+    res.render('customer/add_location'));
+//manageuser/add_user
+app.get('/manageuser/add_user', (_, res) => 
+    res.render('manageuser/add_user'));
+//manageuser/delete_user
+app.get('/manageuser/delete_user', (_, res) => 
+    res.render('manageuser/delete_user'));
+//manageuser/delete_user
+app.get('/manageuser/reset_user', (_, res) => 
+    res.render('manageuser/reset_user'));
+//reports
+app.get('/reports/clientreport', (_, res) => 
+    res.render('reports/clientreport'));
+//reports
+app.get('/reports/dailyreport', (_, res) => 
+    res.render('reports/dailyreport'));
+//accounts
+app.get('/account/account', (_, res) => 
+    res.render('account/account'));
+//Bookerdashboard
+app.get('/bookerdashboard', (_, res) => 
+    res.render('bookerdashboard'));
+//forget-password
+app.get('/forgot-password', (_, res) => 
+    res.render('forgot-password'));
+//User
+app.get('/users/assignuser', (_, res) => 
+    res.render('users/assignuser'));
+
+//routes
+app.use('/manageuser', addUserRoute);
+
+// ✅ **User Registration Route**
+
+//admin
+router.get('/admin', async (req, res) => {
+    try {
+        const users = await User.find(); // Fetch users from database
+        res.render('admin', { users }); // Pass users to EJS
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).send("Internal Server Error");
+    }
 });
 
-// Add Client Page
-app.get('/customer/clients', (_, res) => {
-    res.render('customer/clients');
-});
 
-// Delete Clients
-app.get('/manageuser/delete_user', (_, res) => {
-    res.render('manageuser/delete_user');
-});
-
-// Add-User
-app.get('/manageuser/add_user', (_, res) => {
-    res.render('manageuser/add_user');
-});
-
-// Reset-User
-app.get('/manageuser/reset_user', (_, res) => {
-    res.render('manageuser/reset_user');
-});
-
-// CLient-Report
-app.get('/reports/clientreport', (_, res) => {
-    res.render('reports/clientreport');
-});
-
-// Daily-Report
-app.get('/reports/dailyreport', (_, res) => {
-    res.render('reports/dailyreport');
-});
-
-// Account  
-app.get('/account/account', (_, res) => {
-    res.render('account/account');
-});
-
-// Booker
-app.get('/Bookerdashboard', (_, res) => {
-    res.render('Bookerdashboard');
-});
-
-// Confirm
-app.get('/confirm', (_, res) => {
-    res.render('confirm');
-});
-// Booker-database
-app.post('/Bookerdashboard', (req, res) => {
-    const {
-        companyName, chairperson, contactNumber, email,
-        vcPurpose, department, remark, vcDuration, vcType,
-        vcStartDate, vcEndDate, recording, billingSection
-    } = req.body;
-
-    const query = `INSERT INTO bookings 
-        (companyName, chairperson, contactNumber, email, vcPurpose, department, remark, vcDuration, vcType, vcStartDate, vcEndDate, recording, billingSection)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-    db.query(query, [
-        companyName, chairperson, contactNumber, email,
-        vcPurpose, department, remark, vcDuration, vcType,
-        vcStartDate, vcEndDate, recording, billingSection
-    ], (err, result) => {
-        if (err) {
-            console.error('Error inserting booking:', err);
-            return res.send('Error saving booking.');
-        }
-        res.redirect('/Bookerdashboard'); // Redirect after successful booking
-    });
-});
-
-// Route to get the latest pending booking
-app.get('/confirm', (req, res) => {
-    db.query("SELECT * FROM vc_bookings WHERE status = 'Pending' LIMIT 1", (error, results) => {
-        if (error) {
-            console.error("Error fetching booking:", error);
-            return res.status(500).send("Error fetching booking data");
-        }
-        if (results.length > 0) {
-            res.json(results[0]);
-        } else {
-            res.status(404).send("No pending bookings found");
-        }
-    });
-});
-
-// Route to confirm the booking
-app.post('/confirm', express.json(), (req, res) => {
-    const { id, status, joinLink } = req.body;
-    const query = "UPDATE vc_bookings SET status = ?, join_link = ? WHERE id = ?";
-    
-    db.query(query, [status, joinLink, id], (error, results) => {
-        if (error) {
-            console.error("Error updating booking status:", error);
-            return res.status(500).send("Error updating booking status");
-        }
-        res.status(200).send(`Booking ${status}`);
-    });
-});
-
-// Handle User Login
-app.post('/login', (req, res) => {
+// ✅ **User Login Route**
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     const sql = "SELECT * FROM users WHERE email = ?";
     db.query(sql, [email], async (err, results) => {
-        if (err || results.length === 0) {
-            return res.send('<script>alert("Invalid email or password!"); window.location="/login";</script>');
+        if (err) return res.status(500).send('Database error');
+        if (results.length === 0) return res.status(400).send('User not found');
+
+        const user = results[0];
+        const match = await bcrypt.compare(password, user.password);
+
+        if (!match) return res.status(400).send('Incorrect password');
+
+        req.session.user = user;
+        res.send('Login successful');
+    });
+});
+
+// Route to render assign user page
+app.get('/assignuser', (req, res) => {
+    const sql = "SELECT id, username, email FROM users";
+    db.query(sql, (err, results) => {
+        if (err) {
+            return res.status(500).send("Database error!");
+        }
+        res.render('assignuser', { users: results });
+    });
+});
+
+// API to assign user
+app.post('/assignUser', (req, res) => {
+    const { userId, assignStatus } = req.body;
+
+    const sql = "UPDATE users SET isAssigned = ? WHERE id = ?";
+    db.query(sql, [assignStatus, userId], (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: "Database error!" });
+        }
+        res.json({ message: "User assigned successfully!" });
+    });
+});
+
+// ✅ Admin Login Route
+app.post('/login', (req, res) => {  // 🔹 FIXED: Changed '/views/admin' to '/login'
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+        return res.status(400).send("❌ Email and password are required.");
+    }
+
+    const sql = "SELECT * FROM users WHERE email = ? AND user_group = 'Admin'";
+    
+    db.query(sql, [email], (err, results) => {
+        if (err) {
+            console.error("❌ Database Error:", err);
+            return res.status(500).send("❌ Database error! Try again.");
+        }
+
+        if (results.length === 0) {
+            return res.status(401).send("❌ Invalid credentials or not an admin.");
         }
 
         const user = results[0];
-        const isMatch = await bcrypt.compare(password, user.password);
 
-        if (isMatch) {
-            req.session.user = user;
-            console.log("✅ User logged in:", email);
-            res.redirect('/admin');  // Redirect to the admin page after login
-        } else {
-            res.send('<script>alert("Invalid email or password!"); window.location="/login";</script>');
-        }
-    });
-});
-
-// Route to send user session data to the frontend
-app.get('/getUser', (req, res) => {
-    if (req.session.user) {
-        res.json({ user: req.session.user });
-    } else {
-        res.json({ user: null });
-    }
-});
-
-// Admin adds a user
-app.post('/manageuser/add_user', async (req, res) => {
-    const { userGroup, circle, username, email, mobileNumber, status } = req.body;
-    
-    // Generate a default password (users can change later)
-    const defaultPassword = 'User@123';  // Change this as needed
-    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-
-    // Check if the user already exists
-    const checkSql = `SELECT * FROM users WHERE email = ?`;
-    db.query(checkSql, [email], (err, results) => {
-        if (err) {
-            console.error("❌ Error checking user existence:", err);
-            return res.status(500).json({ message: 'Database error' });
+        // 🔹 FIXED: Use `compareSync()` inside the callback
+        if (!bcrypt.compareSync(password, user.password)) {
+            return res.status(401).send("❌ Invalid credentials.");
         }
 
-        if (results.length > 0) {
-            return res.status(400).json({ message: 'User already exists!' });
-        }
-
-        // Insert new user into database
-        const insertSql = `
-            INSERT INTO users (user_group, store, username, email, password, mobile, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)`;
-
-        db.query(insertSql, [userGroup, circle, username, email, hashedPassword, mobileNumber, status], (err) => {
-            if (err) {
-                console.error("❌ Error creating user:", err);
-                return res.status(500).json({ message: 'Failed to create user' });
-            }
-            res.status(200).json({ message: 'User created successfully! Default password is User@123' });
-        });
-    });
-});
-
-// Nodemailer Setup for sending email
-const transporter = nodemailer.createTransport({
-    service: 'gmail', // Use your email service
-    auth: {
-        user: 'your_email@gmail.com', // Replace with your email address
-        pass: 'your_email_password'    // Replace with your email password (use environment variables for better security)
-    }
-});
-
-// Handle Client Configuration Form Submission
-app.post('/customer/clients', (req, res) => {
-    const { clientName, clientEmail, clientPhone, clientAddress, clientCity, clientState, clientZip, clientCountry } = req.body;
-
-    // SQL Query to insert client into the database
-    const sql = `
-        INSERT INTO clients 
-        (client_name, client_email, client_phone, client_address, client_city, client_state, client_zip, client_country) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    db.query(sql, [clientName, clientEmail, clientPhone, clientAddress, clientCity, clientState, clientZip, clientCountry], (err) => {
-        if (err) {
-            console.error("❌ Error adding client:", err);
-            return res.status(500).send('Failed to add client configuration');
-        }
-
-        // Send Email to Admin
-        const mailOptions = {
-            from: 'your_email@gmail.com',   // Your email address
-            to: 'admin_email@example.com',  // Admin's email address
-            subject: 'New Client Configuration Added',
-            text: `
-                A new client has been added with the following details:
-                
-                Name: ${clientName}
-                Email: ${clientEmail}
-                Phone: ${clientPhone}
-                Address: ${clientAddress}
-                City: ${clientCity}
-                State: ${clientState}
-                ZIP: ${clientZip}
-                Country: ${clientCountry}
-            `
+        // ✅ Store Minimal User Data in Session
+        req.session.user = {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            user_group: user.user_group
         };
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error("❌ Error sending email:", error);
-                return res.status(500).send('Client configuration added, but failed to send email');
-            }
-            console.log("✅ Email sent:", info.response);
-            res.status(200).send('Client configuration added successfully and email sent to admin!');
-        });
+        res.redirect('/admin');
     });
 });
 
-// Admin Page (Dashboard, Protected Route)
+// ✅ Admin Dashboard Route
 app.get('/admin', (req, res) => {
-    // Check if the user is logged in
     if (!req.session.user) {
-        return res.redirect('/login'); // If not logged in, redirect to login
+        return res.redirect('/login');
     }
 
-    // Query to get all users for the admin page
-    const sql = "SELECT * FROM users"; // You can modify this to filter users based on roles if needed
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error("❌ Error fetching users:", err);
-            return res.status(500).send("Error fetching users");
-        }
-
-        // Pass the user data and all users list to admin.ejs
-        res.render('admin', { user: req.session.user, users: results });
-    });
+    if (req.session.user.user_group === "Admin") {
+        const sql = "SELECT id, username, email FROM users";
+        db.query(sql, (err, results) => {
+            if (err) {
+                console.error("❌ Database error:", err);
+                return res.status(500).send("❌ Database error! Try again.");
+            }
+            return res.render('admin', { user: req.session.user, users: results });
+        });
+    } else {
+        return res.status(403).send("❌ Access Denied");
+    }
 });
 
-// Logout
+
+// Nodemailer Configuration
+const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'mohan@gmail.com',
+        pass: '12345'
+    }
+});
+
+// Step 1: Request password reset
+app.post('/reset-password', async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: '❌ Email not found!' });
+        }
+
+        const token = crypto.randomBytes(20).toString('hex');
+        const expires = new Date(Date.now() + 3600000); // 1 hour expiration
+
+        await db.query('UPDATE users SET reset_token=?, reset_expires=? WHERE email=?', [token, expires, email]);
+
+        const resetLink = `http://localhost:3000/reset-password/${token}`;
+        await transporter.sendMail({
+            to: email,
+            subject: 'Password Reset Request',
+            html: `<p>Click <a href="${resetLink}">here</a> to reset your password. The link expires in 1 hour.</p>`
+        });
+
+        res.json({ message: '📩 Reset link sent! Check your email.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: '❌ Error processing request.' });
+    }
+});
+
+// Step 2: Verify Token & Allow Password Reset
+app.get('/reset-password/:token', async (req, res) => {
+    const { token } = req.params;
+
+    try {
+        const [rows] = await db.query('SELECT * FROM users WHERE reset_token=? AND reset_expires > NOW()', [token]);
+        if (rows.length === 0) {
+            return res.status(400).send('❌ Invalid or expired token.');
+        }
+
+        res.render('new-password', { token });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('❌ Error loading reset page.');
+    }
+});
+
+// Step 3: Save New Password
+app.post('/reset-password/:token', async (req, res) => {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    try {
+        const [rows] = await db.query('SELECT * FROM users WHERE reset_token=? AND reset_expires > NOW()', [token]);
+        if (rows.length === 0) {
+            return res.status(400).json({ message: '❌ Invalid or expired token.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await db.query('UPDATE users SET password=?, reset_token=NULL, reset_expires=NULL WHERE reset_token=?', [hashedPassword, token]);
+
+        res.json({ success: true, message: '✅ Password reset successfully! You can now log in.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: '❌ Error resetting password.' });
+    }
+});
+
+//Define-routes
+app.get('/forget-password', (_, res) => res.render('forget-password'));
+// app.get('/manageuser/add_user', (_, res) => res.render('manageuser/add_user'));
+
+// 🔵 **Fix the User Creation Route**
+app.post('/manageuser/add_user', async (req, res) => {
+    try {
+        console.log("Received data:", req.body); // Log request data
+
+        const { userGroup, store, username, email, mobileNumber, status, password } = req.body;
+
+        // Validate required fields
+        if (!userGroup || !store || !username || !email || !mobileNumber || !status || !password) {
+            return res.status(400).json({ message: "⚠️ All fields are required!" });
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ message: "⚠️ User already exists." });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create new user
+        const userData = { 
+            user_group: userGroup, 
+            store: circle,  // Check if 'circle' is being sent properly
+            username, 
+            email, 
+            phone: mobileNumber,  // Make sure 'phone' is mapped correctly
+            status, 
+            password 
+        };
+
+        await newUser.save();
+        res.status(201).json({ message: "✅ User created successfully!" });
+
+    } catch (error) {
+        console.error("❌ Server Error:", error); // Log full error in backend console
+        res.status(500).json({ message: "🚨 Internal Server Error. Check logs for details." });
+    }
+});
+
+router.post('/add_user', async (req, res) => {
+    console.log("📥 Received data from frontend:", req.body);  // Debugging log
+
+    try {
+        const newUser = new User(req.body);
+        await newUser.save();
+        res.status(201).send("User created successfully!");
+    } catch (error) {
+        console.error("❌ Error:", error);
+        res.status(400).send(error.message);
+    }
+});
+
+// ✅ Logout Route
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {
         res.redirect('/login');
     });
 });
 
-// Start Server
-app.listen(port, () => {
-    console.log(`🚀 Server running on http://127.0.0.1:${port}`);
+// ✅ Start Server
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://127.0.0.1:${PORT}`);
 });

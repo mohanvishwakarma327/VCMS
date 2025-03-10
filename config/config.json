@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "root",
+    "password": "Mohansanty@7",
+    "database": "vcms",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

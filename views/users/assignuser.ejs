@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign User</title>
+    <link rel="stylesheet" href="/css/assignuser.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Assign User</h2>
+        <form id="assignUserForm">
+            <label for="userId">Select User:</label>
+            <select id="userId" name="userId" required>
+                <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                    <% users.forEach(user => { %>
+                        <option value="<%= user.id %>"><%= user.username %> - <%= user.email %></option>
+                    <% }) %>
+                <% } else { %>
+                    <option value="">No users found</option>
+                <% } %>
+            </select>
+            
+            <label for="assignStatus">Assign Status:</label>
+            <select id="assignStatus" name="assignStatus">
+                <option value="1">Assign</option>
+                <option value="0">Unassign</option>
+            </select><br>
+
+            <input type="submit" value="Assign User">
+        </form>
+
+        <div id="responseMessage"></div>
+    </div>
+
+    <script>
+        document.getElementById('assignUserForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const userId = document.getElementById('userId').value;
+            const assignStatus = document.getElementById('assignStatus').value;
+
+            fetch('/assignUser', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, assignStatus }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('responseMessage').textContent = data.message;
+            })
+            .catch(error => {
+                document.getElementById('responseMessage').textContent = "Error assigning user.";
+            });
+        });
+    </script>
+</body>
+</html>
