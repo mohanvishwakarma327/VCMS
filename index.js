@@ -11,36 +11,43 @@ const crypto = require('crypto');
 const authRoutes = require('./routes/auth');
 const mongoose = require("mongoose"); // ✅ Correct
 const manageUserRoutes = require("./routes/manageUser");
-const MONGO_URI = process.env.MONGO_URI;
+// const MONGO_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
 const router = express.Router();
 const addUserRoute = require('./routes/add_user'); 
 const userRoutes = require('./routes/userRoutes');
 const User = require('./models/user'); // Import User model
 const dotenv = require("dotenv");
+// const vcms = require('./SQL/vcms');
 
 
 const app = express();
 const PORT = process.env.PORT || 5502;
 
-// ✅ MySQL Database Connection
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Mohansanty@7',
-    database: 'vcms'
-}); 
+// // Convert to Promise-based queries
+// console.log("MONGO_URI from .env:", process.env.MONGO_URI);
+// mongoose .connect('mongodb://localhost:27017/vcms', {
+//         useNewUrlParser: true,
+//         useUnifiedTopology: true,
+//     })
+//     .then(() => console.log("✅ MongoDB connected successfully!"))
+//     .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Convert to Promise-based queries
-console.log("MONGO_URI from .env:", process.env.MONGO_URI);
-mongoose .connect('mongodb://localhost:27017/vcms', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-    .then(() => console.log("✅ MongoDB connected successfully!"))
-    .catch((err) => console.error("❌ MongoDB connection error:", err));
+// require("dotenv").config(); // Load .env variables
 
+require('dotenv').config();
 
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/vcms';
+
+mongoose.connect(MONGO_URI)
+    .then(() => console.log('✅ MongoDB connected successfully!'))
+    .catch(err => console.error('❌ MongoDB connection error:', err));
+
+const vcms = mongoose.connection;
+
+module.exports = app;
+
+// module.exports = vcms; // Export connection
 
 //Routes
 app.use("/auth", require("./routes/auth")); // Ensure this path is correct
@@ -58,6 +65,9 @@ app.use(bodyParser.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 dotenv.config();
+app.use(express.json());   // new write by 16-03-2025
+app.use(express.urlencoded({ extended: true })); // new write by 16-03-2025
+
 
 // ✅ Session Middleware
 app.use(session({
@@ -318,52 +328,41 @@ app.get('/forget-password', (_, res) => res.render('forget-password'));
 // app.get('/manageuser/add_user', (_, res) => res.render('manageuser/add_user'));
 
 // 🔵 **Fix the User Creation Route**
-app.post('/manageuser/add_user', async (req, res) => {
+app.post("/manageuser/add_user", async (req, res) => {
     try {
-        console.log("Received data:", req.body); // Log request data
+        const { user_group, store, username, email, password, phone } = req.body;
 
-        const { userGroup, store, username, email, mobileNumber, status, password } = req.body;
-
-        // Validate required fields
-        if (!userGroup || !store || !username || !email || !mobileNumber || !status || !password) {
-            return res.status(400).json({ message: "⚠️ All fields are required!" });
+        if (!user_group || !store || !username || !email || !password || !phone) {
+            return res.status(400).json({ message: "❌ All fields are required!" });
         }
 
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(409).json({ message: "⚠️ User already exists." });
-        }
-
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create new user
-        const userData = { 
-            user_group: userGroup, 
-            store: circle,  // Check if 'circle' is being sent properly
-            username, 
-            email, 
-            phone: mobileNumber,  // Make sure 'phone' is mapped correctly
-            status, 
-            password 
-        };
+        const newUser = new User({
+            user_group,
+            store,
+            username,
+            email,
+            password: hashedPassword,
+            phone
+        });
 
         await newUser.save();
-        res.status(201).json({ message: "✅ User created successfully!" });
+        res.status(201).json({ message: "✅ User added successfully!" });
 
     } catch (error) {
-        console.error("❌ Server Error:", error); // Log full error in backend console
-        res.status(500).json({ message: "🚨 Internal Server Error. Check logs for details." });
+        console.error("Error adding user:", error);
+        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
     }
 });
+
 
 router.post('/add_user', async (req, res) => {
     console.log("📥 Received data from frontend:", req.body);  // Debugging log
 
     try {
-        const newUser = new User(req.body);
-        await newUser.save();
+        const add_user = new data(req.body);
+        await add_user.save();
         res.status(201).send("User created successfully!");
     } catch (error) {
         console.error("❌ Error:", error);
