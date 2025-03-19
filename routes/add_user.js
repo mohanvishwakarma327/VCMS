@@ -6,7 +6,7 @@ const router = express.Router();
 // ✅ Add User Route
 router.post('/add_user', async (req, res) => {
     try {
-        const { userGroup, store, username, email, mobileNumber, status, password } = req.body;
+        const { user_group, store, username, email, phone, status, password } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -19,11 +19,11 @@ router.post('/add_user', async (req, res) => {
 
         // Create new user
         const newUser = new User({
-            userGroup,
+            user_group,
             store,
             username,
             email,
-            mobileNumber,
+            phone,
             status,
             password: hashedPassword,
         });

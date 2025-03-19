@@ -24,17 +24,6 @@ const dotenv = require("dotenv");
 const app = express();
 const PORT = process.env.PORT || 5502;
 
-// // Convert to Promise-based queries
-// console.log("MONGO_URI from .env:", process.env.MONGO_URI);
-// mongoose .connect('mongodb://localhost:27017/vcms', {
-//         useNewUrlParser: true,
-//         useUnifiedTopology: true,
-//     })
-//     .then(() => console.log("✅ MongoDB connected successfully!"))
-//     .catch((err) => console.error("❌ MongoDB connection error:", err));
-
-// require("dotenv").config(); // Load .env variables
-
 require('dotenv').config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/vcms';
@@ -67,6 +56,12 @@ app.set('views', path.join(__dirname, 'views'));
 dotenv.config();
 app.use(express.json());   // new write by 16-03-2025
 app.use(express.urlencoded({ extended: true })); // new write by 16-03-2025
+app.use(session({
+    secret: "yourSecretKey",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Set secure: true in production with HTTPS --change on 19-03-2025 by krish
+}));
 
 
 // ✅ Session Middleware
@@ -145,22 +140,53 @@ router.get('/admin', async (req, res) => {
 
 
 // ✅ **User Login Route**
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+// app.post('/login', async (req, res) => {
+//     const { email, password } = req.body;
 
-    const sql = "SELECT * FROM users WHERE email = ?";
-    db.query(sql, [email], async (err, results) => {
-        if (err) return res.status(500).send('Database error');
-        if (results.length === 0) return res.status(400).send('User not found');
+//     const sql = "SELECT * FROM users WHERE email = ?";
+//     db.query(sql, [email], async (err, results) => {
+//         if (err) return res.status(500).send('Database error');
+//         if (results.length === 0) return res.status(400).send('User not found');
 
-        const user = results[0];
+//         const user = results[0];
+//         const match = await bcrypt.compare(password, user.password);
+
+//         if (!match) return res.status(400).send('Incorrect password');
+
+//         req.session.user = user;
+//         res.send('Login successful');
+//     });
+// });
+// 🔹 Login Route (MongoDB + Mongoose)  change on 19-03-2025 by krish
+app.post('/login', async (req, res) => { 
+    try {
+        const { email, password } = req.body;
+
+        // 🛑 Validate input
+        if (!email || !password) {
+            return res.status(400).json({ message: "❌ Email and password are required!" });
+        }
+
+        // 🔍 Find user by email in MongoDB
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: "❌ User not found!" });
+        }
+
+        // 🔑 Compare hashed passwords
         const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(400).json({ message: "❌ Incorrect password!" });
+        }
 
-        if (!match) return res.status(400).send('Incorrect password');
-
+        // ✅ Set session & return success response
         req.session.user = user;
-        res.send('Login successful');
-    });
+        res.status(200).json({ message: "✅ Login successful!" });
+
+    } catch (error) {
+        console.error("❌ Error during login:", error);
+        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
+    }
 });
 
 // Route to render assign user page
@@ -187,62 +213,124 @@ app.post('/assignUser', (req, res) => {
     });
 });
 
-// ✅ Admin Login Route
-app.post('/login', (req, res) => {  // 🔹 FIXED: Changed '/views/admin' to '/login'
-    const { email, password } = req.body;
+// // ✅ Admin Login Route
+// app.post('/login', (req, res) => {  // 🔹 FIXED: Changed '/views/admin' to '/login'
+//     const { email, password } = req.body;
     
-    if (!email || !password) {
-        return res.status(400).send("❌ Email and password are required.");
-    }
+//     if (!email || !password) {
+//         return res.status(400).send("❌ Email and password are required.");
+//     }
 
-    const sql = "SELECT * FROM users WHERE email = ? AND user_group = 'Admin'";
+//     const sql = "SELECT * FROM users WHERE email = ? AND user_group = 'Admin'";
     
-    db.query(sql, [email], (err, results) => {
-        if (err) {
-            console.error("❌ Database Error:", err);
-            return res.status(500).send("❌ Database error! Try again.");
+//     db.query(sql, [email], (err, results) => {
+//         if (err) {
+//             console.error("❌ Database Error:", err);
+//             return res.status(500).send("❌ Database error! Try again.");
+//         }
+
+//         if (results.length === 0) {
+//             return res.status(401).send("❌ Invalid credentials or not an admin.");
+//         }
+
+//         const user = results[0];
+
+//         // 🔹 FIXED: Use `compareSync()` inside the callback
+//         if (!bcrypt.compareSync(password, user.password)) {
+//             return res.status(401).send("❌ Invalid credentials.");
+//         }
+
+//         // ✅ Store Minimal User Data in Session
+//         req.session.user = {
+//             id: user.id,
+//             username: user.username,
+//             email: user.email,
+//             user_group: user.user_group
+//         };
+
+//         res.redirect('/admin');
+//     });
+// });
+
+// ✅ Admin Login Route (MongoDB + Mongoose)  change on 19-03-2025 by krish
+app.post('/login', async (req, res) => {  
+    try {
+        const { email, password } = req.body;
+
+        // 🛑 Validate Input
+        if (!email || !password) {
+            return res.status(400).json({ message: "❌ Email and password are required." });
         }
 
-        if (results.length === 0) {
-            return res.status(401).send("❌ Invalid credentials or not an admin.");
+        // 🔍 Find admin user in MongoDB
+        const user = await User.findOne({ email, user_group: 'Admin' });
+        if (!user) {
+            return res.status(401).json({ message: "❌ Invalid credentials or not an admin." });
         }
 
-        const user = results[0];
-
-        // 🔹 FIXED: Use `compareSync()` inside the callback
-        if (!bcrypt.compareSync(password, user.password)) {
-            return res.status(401).send("❌ Invalid credentials.");
+        // 🔑 Compare hashed passwords
+        const isMatch = bcrypt.compareSync(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: "❌ Invalid credentials." });
         }
 
         // ✅ Store Minimal User Data in Session
         req.session.user = {
-            id: user.id,
+            id: user._id,
             username: user.username,
             email: user.email,
             user_group: user.user_group
         };
 
-        res.redirect('/admin');
-    });
+        res.redirect('/admin'); // Redirect to admin panel
+
+    } catch (error) {
+        console.error("❌ Error during login:", error);
+        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
+    }
 });
 
-// ✅ Admin Dashboard Route
-app.get('/admin', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/login');
-    }
+// // ✅ Admin Dashboard Route
+// app.get('/admin', (req, res) => {
+//     if (!req.session.user) {
+//         return res.redirect('/login');
+//     }
 
-    if (req.session.user.user_group === "Admin") {
-        const sql = "SELECT id, username, email FROM users";
-        db.query(sql, (err, results) => {
-            if (err) {
-                console.error("❌ Database error:", err);
-                return res.status(500).send("❌ Database error! Try again.");
-            }
-            return res.render('admin', { user: req.session.user, users: results });
-        });
-    } else {
-        return res.status(403).send("❌ Access Denied");
+//     if (req.session.user.user_group === "Admin") {
+//         const sql = "SELECT id, username, email FROM user";
+//         db.query(sql, (err, results) => {
+//             if (err) {
+//                 console.error("❌ Database error:", err);
+//                 return res.status(500).send("❌ Database error! Try again.");
+//             }
+//             return res.render('admin', { user: req.session.user, users: results });
+//         });
+//     } else {
+//         return res.status(403).send("❌ Access Denied");
+//     }
+// });
+// ✅ Admin Dashboard Route (MongoDB + Mongoose)   change on 19-03-2025 by krish
+app.get('/admin', async (req, res) => {
+    try {
+        // 🔑 Check if user is logged in
+        if (!req.session.user) {
+            return res.redirect('/login');
+        }
+
+        // 🔍 Verify if user is an Admin
+        if (req.session.user.user_group !== "Admin") {
+            return res.status(403).send("❌ Access Denied");
+        }
+
+        // 📌 Fetch all users (id, username, email) from MongoDB
+        const users = await User.find({}, "id username email");
+
+        // 🎨 Render admin dashboard with user data
+        res.render('admin', { user: req.session.user, users });
+
+    } catch (error) {
+        console.error("❌ Database error:", error);
+        res.status(500).send("❌ Database error! Try again.");
     }
 });
 
@@ -361,8 +449,8 @@ router.post('/add_user', async (req, res) => {
     console.log("📥 Received data from frontend:", req.body);  // Debugging log
 
     try {
-        const add_user = new data(req.body);
-        await add_user.save();
+        const newUser = new User(req.body);
+        await newUser.save();
         res.status(201).send("User created successfully!");
     } catch (error) {
         console.error("❌ Error:", error);
