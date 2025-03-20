@@ -18,8 +18,23 @@ const addUserRoute = require('./routes/add_user');
 const userRoutes = require('./routes/userRoutes');
 const User = require('./models/user'); // Import User model
 const dotenv = require("dotenv");
-// const vcms = require('./SQL/vcms');
+const MongoStore = require('connect-mongo'); //Mohan
+const jwt = require('jsonwebtoken');
+const deleteUserRoute = require('./routes/deleteUser'); 
 
+
+const authenticateJWT = (req, res, next) => {
+    const token = req.cookies.token; // Assuming token is stored in cookies
+    if (!token) return res.redirect('/login');
+
+    jwt.verify(token, 'your_secret_key', (err, user) => {
+        if (err) return res.redirect('/login');
+        req.user = user;
+        next();
+    });
+};
+
+// const vcms = require('./SQL/vcms');
 
 const app = express();
 const PORT = process.env.PORT || 5502;
@@ -43,6 +58,7 @@ app.use("/auth", require("./routes/auth")); // Ensure this path is correct
 
 
 // ✅ Middleware
+app.use(deleteUserRoute);
 app.use('/', authRoutes);
 app.use('/views/manageuser', userRoutes);
 // const userRoutes = require('./routes/userRoutes');
@@ -57,12 +73,19 @@ dotenv.config();
 app.use(express.json());   // new write by 16-03-2025
 app.use(express.urlencoded({ extended: true })); // new write by 16-03-2025
 app.use(session({
-    secret: "yourSecretKey",
+    secret: 'your-secret-key',  // Change this to a strong secret
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } // Set secure: true in production with HTTPS --change on 19-03-2025 by krish
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: 'mongodb://localhost:27017/vcms',  // Change to your actual DB
+        collectionName: 'sessions'
+    }),
+    cookie: {
+        secure: false,  // Set to true if using HTTPS
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60  // 1 hour session
+    }
 }));
-
 
 // ✅ Session Middleware
 app.use(session({
@@ -86,8 +109,8 @@ app.get('/confirm', (_, res) =>
 app.get('/forget-password', (_, res) => 
     res.render('forget-password'));
 //admin-page
-app.get('/admin', (_, res) => 
-    res.render('admin'));
+// app.get('/admin', (_, res) => 
+//     res.render('admin'));
 //customer/clients
 app.get('/customer/clients', (_, res) => 
     res.render('customer/clients'));
@@ -125,7 +148,17 @@ app.get('/users/assignuser', (_, res) =>
 //routes
 app.use('/manageuser', addUserRoute);
 
-// ✅ **User Registration Route**
+
+// Middleware to check if user is logged in
+function isAuthenticated(req, res, next) {
+    if (req.session && req.session.user) {
+        return next(); // ✅ User is authenticated, continue to the next middleware
+    } else {
+        return res.redirect('/login'); // 🔒 Redirect to login page if not logged in
+    }
+}
+
+
 
 //admin
 router.get('/admin', async (req, res) => {
@@ -137,27 +170,25 @@ router.get('/admin', async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+app.get('/admin', isAuthenticated, async (req, res) => {
+    try {
+        // Ensure the logged-in user is an admin
+        if (req.session.user.user_group !== "Admin") {
+            return res.status(403).send("❌ Access Denied");
+        }
 
+        // Fetch all users from MongoDB
+        const users = await User.find({}, "id username email");
 
-// ✅ **User Login Route**
-// app.post('/login', async (req, res) => {
-//     const { email, password } = req.body;
+        // Render the admin dashboard
+        res.render('admin', { user: req.session.user, users });
 
-//     const sql = "SELECT * FROM users WHERE email = ?";
-//     db.query(sql, [email], async (err, results) => {
-//         if (err) return res.status(500).send('Database error');
-//         if (results.length === 0) return res.status(400).send('User not found');
+    } catch (error) {
+        console.error("❌ Database error:", error);
+        res.status(500).send("❌ Database error! Try again.");
+    }
+});
 
-//         const user = results[0];
-//         const match = await bcrypt.compare(password, user.password);
-
-//         if (!match) return res.status(400).send('Incorrect password');
-
-//         req.session.user = user;
-//         res.send('Login successful');
-//     });
-// });
-// 🔹 Login Route (MongoDB + Mongoose)  change on 19-03-2025 by krish
 app.post('/login', async (req, res) => { 
     try {
         const { email, password } = req.body;
@@ -180,8 +211,8 @@ app.post('/login', async (req, res) => {
         }
 
         // ✅ Set session & return success response
-        req.session.user = user;
-        res.status(200).json({ message: "✅ Login successful!" });
+        req.session.user = user; 
+        res.status(200).json({ message: "✅ Login ok!" });
 
     } catch (error) {
         console.error("❌ Error during login:", error);
@@ -212,45 +243,15 @@ app.post('/assignUser', (req, res) => {
         res.json({ message: "User assigned successfully!" });
     });
 });
+//Login authication
+const authenticateUser = (req, res, next) => {
+    if (!req.session || !req.session.user) {
+        return res.redirect('/login'); // Redirect to login if not authenticated
+    }
+    next();
+};
 
-// // ✅ Admin Login Route
-// app.post('/login', (req, res) => {  // 🔹 FIXED: Changed '/views/admin' to '/login'
-//     const { email, password } = req.body;
-    
-//     if (!email || !password) {
-//         return res.status(400).send("❌ Email and password are required.");
-//     }
-
-//     const sql = "SELECT * FROM users WHERE email = ? AND user_group = 'Admin'";
-    
-//     db.query(sql, [email], (err, results) => {
-//         if (err) {
-//             console.error("❌ Database Error:", err);
-//             return res.status(500).send("❌ Database error! Try again.");
-//         }
-
-//         if (results.length === 0) {
-//             return res.status(401).send("❌ Invalid credentials or not an admin.");
-//         }
-
-//         const user = results[0];
-
-//         // 🔹 FIXED: Use `compareSync()` inside the callback
-//         if (!bcrypt.compareSync(password, user.password)) {
-//             return res.status(401).send("❌ Invalid credentials.");
-//         }
-
-//         // ✅ Store Minimal User Data in Session
-//         req.session.user = {
-//             id: user.id,
-//             username: user.username,
-//             email: user.email,
-//             user_group: user.user_group
-//         };
-
-//         res.redirect('/admin');
-//     });
-// });
+app.use('/admin', authenticateUser);
 
 // ✅ Admin Login Route (MongoDB + Mongoose)  change on 19-03-2025 by krish
 app.post('/login', async (req, res) => {  
@@ -310,6 +311,35 @@ app.post('/login', async (req, res) => {
 //     }
 // });
 // ✅ Admin Dashboard Route (MongoDB + Mongoose)   change on 19-03-2025 by krish
+
+// delete user from database Ensure you have your DB connection set up BY Mohan
+router.delete('/delete-user', async (req, res) => {
+    try {
+        const { userIdentifier } = req.body;
+
+        if (!userIdentifier) {
+            return res.status(400).json({ message: "User ID or Email is required." });
+        }
+
+        // Check if the user exists
+        const userCheckQuery = 'SELECT * FROM users WHERE id = ? OR email = ?';
+        const [user] = await db.execute(userCheckQuery, [userIdentifier, userIdentifier]);
+
+        if (user.length === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        // Delete the user
+        const deleteQuery = 'DELETE FROM users WHERE id = ? OR email = ?';
+        await db.execute(deleteQuery, [userIdentifier, userIdentifier]);
+
+        res.status(200).json({ message: "User deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+});
+
 app.get('/admin', async (req, res) => {
     try {
         // 🔑 Check if user is logged in

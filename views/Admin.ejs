@@ -62,28 +62,37 @@
             <a href="/login" class="signoff-btn">Sign Off</a>     
         </nav>
 
-        <!-- Display Users from the Database -->
+       <!-- Display Users from the Database -->
+       <!-- Display Users from the Database -->
         <div class="content">
             <h2>Registered Users</h2>
+            
             <% if (typeof users !== 'undefined' && users.length > 0) { %>
-                <table border="1">
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                    </tr>
-                    <% users.forEach(user => { %>
+                <table class="user-table">
+                    <thead>
                         <tr>
-                            <td><%= user._id %></td>
-                            <td><%= user.username %></td>
-                            <td><%= user.email %></td>
+                            <th>ID</th>
+                            <th>Users</th>
                         </tr>
-                    <% }) %>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(user => { %>
+                            <tr>
+                                <td rowspan="2"><%= user._id %></td>
+                                <td><strong>Username:</strong> <%= user.username %></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong> <%= user.email %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
                 </table>
             <% } else { %>
-                <p>No registered users found.</p>
+                <p class="no-users">No registered users found.</p>
             <% } %>          
         </div>
+
+
 
         <footer class="footer">
             <p>Powered by Your Company</p>

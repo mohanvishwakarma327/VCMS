@@ -126,3 +126,45 @@
     padding: 15px;
     border-radius: 5px;
 }
+/* Styling for the users table */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Table headers */
+.user-table th {
+    background-color: #007bff;
+    color: white;
+    text-align: left;
+    padding: 10px;
+}
+
+/* Table rows */
+.user-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Alternate row colors */
+.user-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Hover effect */
+.user-table tbody tr:hover {
+    background-color: #ddd;
+}
+
+/* No users message */
+.no-users {
+    font-size: 18px;
+    color: #ff4444;
+    text-align: center;
+    margin-top: 20px;
+}
