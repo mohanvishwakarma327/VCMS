@@ -20,7 +20,7 @@ const User = require('./models/user'); // Import User model
 const dotenv = require("dotenv");
 const MongoStore = require('connect-mongo'); //Mohan
 const jwt = require('jsonwebtoken');
-const deleteUserRoute = require('./routes/deleteUser'); 
+// const deleteUserRoute = require('./routes/delete_user'); 
 
 
 const authenticateJWT = (req, res, next) => {
@@ -58,7 +58,8 @@ app.use("/auth", require("./routes/auth")); // Ensure this path is correct
 
 
 // ✅ Middleware
-app.use(deleteUserRoute);
+
+
 app.use('/', authRoutes);
 app.use('/views/manageuser', userRoutes);
 // const userRoutes = require('./routes/userRoutes');
@@ -86,6 +87,11 @@ app.use(session({
         maxAge: 1000 * 60 * 60  // 1 hour session
     }
 }));
+
+// Import Routes change on 21 march
+const deleteUserRoute = require("./routes/delete_user");
+app.use("/", deleteUserRoute); // w o 21-03-25
+app.use(deleteUserRoute);
 
 // ✅ Session Middleware
 app.use(session({
@@ -313,32 +319,58 @@ app.post('/login', async (req, res) => {
 // ✅ Admin Dashboard Route (MongoDB + Mongoose)   change on 19-03-2025 by krish
 
 // delete user from database Ensure you have your DB connection set up BY Mohan
-router.delete('/delete-user', async (req, res) => {
+
+// ✅ DELETE user from MongoDB  change on 20-03-2025
+router.delete("/delete_user", async (req, res) => {   // deltet-user to delete_usero on 21 march
     try {
         const { userIdentifier } = req.body;
 
         if (!userIdentifier) {
-            return res.status(400).json({ message: "User ID or Email is required." });
+            return res.status(400).json({ message: "❌ User ID or Email is required!" });
         }
 
-        // Check if the user exists
-        const userCheckQuery = 'SELECT * FROM users WHERE id = ? OR email = ?';
-        const [user] = await db.execute(userCheckQuery, [userIdentifier, userIdentifier]);
+        // ✅ Find and delete user by ID or Email
+        const result = await User.deleteOne({
+            $or: [{ _id: userIdentifier }, { email: userIdentifier }]
+        });
 
-        if (user.length === 0) {
-            return res.status(404).json({ message: "User not found." });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: "❌ User not found!" });
         }
 
-        // Delete the user
-        const deleteQuery = 'DELETE FROM users WHERE id = ? OR email = ?';
-        await db.execute(deleteQuery, [userIdentifier, userIdentifier]);
-
-        res.status(200).json({ message: "User deleted successfully." });
+        res.status(200).json({ message: "✅ User deleted successfully!" });
     } catch (error) {
-        console.error("Error deleting user:", error);
-        res.status(500).json({ message: "Internal server error." });
+        console.error("❌ Error deleting user:", error);
+        res.status(500).json({ message: "❌ Internal Server Error" });
     }
 });
+
+// router.delete('/delete-user', async (req, res) => {
+//     try {
+//         const { userIdentifier } = req.body;
+
+//         if (!userIdentifier) {
+//             return res.status(400).json({ message: "User ID or Email is required." });
+//         }
+
+//         // Check if the user exists
+//         const userCheckQuery = 'SELECT * FROM users WHERE id = ? OR email = ?';
+//         const [user] = await db.execute(userCheckQuery, [userIdentifier, userIdentifier]);
+
+//         if (user.length === 0) {
+//             return res.status(404).json({ message: "User not found." });
+//         }
+
+//         // Delete the user
+//         const deleteQuery = 'DELETE FROM users WHERE id = ? OR email = ?';
+//         await db.execute(deleteQuery, [userIdentifier, userIdentifier]);
+
+//         res.status(200).json({ message: "User deleted successfully." });
+//     } catch (error) {
+//         console.error("Error deleting user:", error);
+//         res.status(500).json({ message: "Internal server error." });
+//     }
+// });
 
 app.get('/admin', async (req, res) => {
     try {

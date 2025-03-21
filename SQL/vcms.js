@@ -99,6 +99,26 @@ const vcms = mongoose.model("vcms", userSchema); // ✅ Fixed: Defined before ex
     }
 })();
 
+
+// ✅ Delete  User if Exists   right on 20-03-2025
+async function deleteUser(email) {
+    try {
+        const deletedUser = await User.findOneAndDelete({ email: email });
+
+        if (deletedUser) {
+            console.log(`✅ User with email '${email}' deleted successfully.`);
+        } else {
+            console.log(`⚠️ User with email '${email}' not found.`);
+        }
+    } catch (error) {
+        console.error("❌ Error Deleting User:", error);
+    }
+}
+
+// Call the Function to Delete a User  // write on 21 -03-2025
+deleteUser("store@gmail.com");  // Change email to delete another user
+
+
 // ✅ Export Models (Fixed)
 module.exports = { vcms, User, Client, Booking, VCBooking };
 
