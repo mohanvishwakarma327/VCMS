@@ -1,12 +1,12 @@
-<!DOCTYPE html>  
+<!-- <!DOCTYPE html>  
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Login to VCNow</title>
     <link rel="stylesheet" href="/css/login.css">
 </head>
-<body>
-    <form action="/login" method="POST">
+<body>    // added id = loginForm on 21-03-2025
+    <form action="/login" method="POST" id="loginForm">
         <h2>Login to VCNow</h2>
     
         <label for="email">Email:</label>
@@ -39,5 +39,69 @@
         alert(result.message || "Login failed");
     });
     </script>
+<script src="index.js"></script>
+</html> -->
+
+  <!-- write by krishna on 21-03-2025 -->
+<!DOCTYPE html>   
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login to VCNow</title>
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+    <form id="loginForm">  <!-- ✅ Added id="loginForm" -->
+        <h2>Login to VCNow</h2>
+    
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" placeholder="Enter your email" required><br><br>
+    
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" placeholder="Enter your password" required><br><br>
+    
+        <button type="submit">Login</button>
+        <br><br>
+    
+        <p><a href="/forgot-password">Forgot Password?</a></p>
+    </form>    
+</body>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert(result.message || "✅ Login successful!");
+
+                // ✅ Redirect based on user role
+                if (result.role === "admin") {
+                    window.location.href = "/admin-dashboard"; // Change to actual admin page URL
+                } else {
+                    window.location.href = "/user-dashboard"; // Change to user dashboard
+                }
+            } else {
+                alert(result.message || "❌ Login failed! Please check your credentials.");
+            }
+
+        } catch (error) {
+            console.error("❌ Error logging in:", error);
+            alert("🚨 Something went wrong! Please try again.");
+        }
+    });
+</script>
+
 <script src="index.js"></script>
 </html>

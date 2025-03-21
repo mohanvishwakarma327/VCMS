@@ -89,7 +89,7 @@ app.use(session({
     }
 }));
 
-// Import Routes change on 21 march
+// Import Routes change on 21 march by krishna 
 const deleteUserRoute = require("./routes/delete_user");
 app.use("/", deleteUserRoute); // w o 21-03-25
 app.use(deleteUserRoute);
@@ -151,6 +151,9 @@ app.get('/forgot-password', (_, res) =>
 //User
 app.get('/users/assignuser', (_, res) => 
     res.render('users/assignuser'));
+//user-dashboard
+app.get('/user-dashboard', (_, res) => 
+    res.render('user-dashboard'));
 
 //routes
 app.use('/manageuser', addUserRoute);
