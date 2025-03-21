@@ -32,22 +32,22 @@ router.post("/admin/login", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+// router.post('/login', async (req, res) => {
+//     const { email, password } = req.body;
 
-    try {
-        const user = await User.findOne({ where: { email } });
+//     try {
+//         const user = await User.findOne({ where: { email } });
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.render('login', { error: 'Invalid credentials' });
-        }
+//         if (!user || !(await bcrypt.compare(password, user.password))) {
+//             return res.render('login', { error: 'Invalid credentials' });
+//         }
 
-        req.session.user = { email: user.email, id: user.id };
-        res.redirect('/bookerdashboard');
-    } catch (error) {
-        console.error('Login Error:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
+//         req.session.user = { email: user.email, id: user.id };
+//         res.redirect('/bookerdashboard');
+//     } catch (error) {
+//         console.error('Login Error:', error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// });
 
 module.exports = router;
