@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -21,16 +21,23 @@
     </div>
 
     <!-- NAVBAR -->
-    <nav>
+    <nav> 
         <a href="#" onclick="showSection('bookVC')">Book New VC</a>
         <a href="#" onclick="showSection('confirmVC')">Find/Confirm VC</a>
         <a href="/logout" class="logout-btn">Logout</a>
+        <div class="user-info">
+            <% if (typeof user !== 'undefined' && user && user.email) { %>
+                <span id="userEmail"><%= user.email %></span>
+            <% } else { %>
+                <span id="userEmail">Guest</span>
+            <% } %>
+        </div>       
     </nav>
 
     <!-- BOOKING FORM -->
     <div class="container section active-section" id="bookVC">
         <h2>Book a VC Session</h2>
-        <form action="/Bookerdashboard" method="post">
+        <form action="/bookerdashboard" method="post">  <!-- ✅ Fixed route (lowercase) -->
             <label for="companyName">Company Name:</label>
             <input type="text" name="companyName" required>
 
@@ -45,22 +52,21 @@
 
             <label for="vcPurpose">VC Purpose:</label>
             <select name="vcPurpose" required>
-            <option value="">-- Select Purpose --</option>
-            <option value="business_meeting">Business Meeting</option>
-            <option value="training_session">Training Session</option>
-            <option value="client_meeting">Client Meeting</option>
-            <option value="team_meeting">Team Meeting</option>
-            <option value="interview">Interview</option>
-            <option value="presentation">Presentation</option>
-            <option value="other">Other</option>
+                <option value="">-- Select Purpose --</option>
+                <option value="business_meeting">Business Meeting</option>
+                <option value="training_session">Training Session</option>
+                <option value="client_meeting">Client Meeting</option>
+                <option value="team_meeting">Team Meeting</option>
+                <option value="interview">Interview</option>
+                <option value="presentation">Presentation</option>
+                <option value="other">Other</option>
             </select>
 
             <label for="remark">Remark:</label>
             <textarea name="remark" rows="3"></textarea>
 
-            <label for="vcDuration">VC Duration:</label>
+            <label for="vcDuration">VC Duration (hours):</label>
             <input type="number" name="vcDuration" min="0.5" step="0.5" required>
-
 
             <label for="vcType">VC Type:</label>
             <select name="vcType" required>
@@ -69,22 +75,22 @@
                 <option value="hybrid">Both</option>
             </select>
 
-            <label for="vcStartDate">VC Start Date:</label>
+            <label for="vcStartDate">VC Start Date & Time:</label>
             <input type="datetime-local" name="vcStartDate" required>
 
-            <label for="vcEndDate">VC End Date:</label>
+            <label for="vcEndDate">VC End Date & Time:</label>
             <input type="datetime-local" name="vcEndDate" required>
 
             <label for="recording">Recording Required:</label>
             <select name="recording" required>
-                <option value="Select">Choose</option>
+                <option value="">-- Choose --</option>
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
             </select>
 
             <label for="billingSection">Billing Section:</label>
             <select name="billingSection" required>
-                <option value="Select">Choose</option>
+                <option value="">-- Choose --</option>
                 <option value="prepaid">Prepaid</option>
                 <option value="postpaid">Postpaid</option>
             </select>
@@ -93,37 +99,36 @@
         </form>
     </div>
 
-   <!-- CONFIRMATION SECTION -->
-<div class="container section" id="confirmVC">
-    <h2>Find/Confirm VC Session</h2>
-    <table border="1">
-        <tr>
-            <th>Company</th>
-            <th>Chairperson</th>
-            <th>Start Time</th>
-            <th>End Time</th>
-        </tr>
-        <% if (typeof vcSessions !== 'undefined' && vcSessions.length > 0) { %>
-        <% vcSessions.forEach(session => { %>
-        <tr>
-            <td><%= session.companyName %></td>
-            <td><%= session.chairperson %></td>
-            <td><%= session.vcStartDate %></td>
-            <td><%= session.vcEndDate %></td>
-        </tr>  <!-- ✅ Properly closing the <tr> -->
-        <% }) %>
-        <% } else { %>
-        <tr>
-            <td colspan="4">No VC sessions found.</td>
-        </tr>
-        <% } %>
-    </table>
-</div>
-
-
+    <!-- CONFIRMATION SECTION -->
+    <div class="container section" id="confirmVC">
+        <h2>Find/Confirm VC Session</h2>
+        <table border="1">
+            <tr>
+                <th>Company</th>
+                <th>Chairperson</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+            </tr>
+            <% if (typeof vcSessions !== 'undefined' && vcSessions.length > 0) { %>
+                <% vcSessions.forEach(session => { %>
+                    <tr>
+                        <td><%= session.companyName %></td>
+                        <td><%= session.chairperson %></td>
+                        <td><%= new Date(session.vcStartDate).toLocaleString() %></td>  <!-- ✅ Fixed date formatting -->
+                        <td><%= new Date(session.vcEndDate).toLocaleString() %></td>    <!-- ✅ Fixed date formatting -->
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="4">No VC sessions found.</td>
+                </tr>
+            <% } %>
+        </table>
+    </div>
 
     <div class="footer">
         <p>Powered by VCNow &copy; 2025. All rights reserved.</p>
     </div>
+
 </body>
 </html>

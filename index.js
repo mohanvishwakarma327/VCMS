@@ -77,6 +77,7 @@ app.use(session({
     secret: 'your-secret-key',  // Change this to a strong secret
     resave: false,
     saveUninitialized: false,
+    cookie: { secure: false }, // Use true if using HTTPS
     store: MongoStore.create({
         mongoUrl: 'mongodb://localhost:27017/vcms',  // Change to your actual DB
         collectionName: 'sessions'
@@ -163,7 +164,32 @@ function isAuthenticated(req, res, next) {
         return res.redirect('/login'); // 🔒 Redirect to login page if not logged in
     }
 }
+// 🚀 Login Route
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
 
+    const user = await User.findOne({ where: { email } });
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+        return res.render('login', { error: 'Invalid credentials' });
+    }
+
+    req.session.user = { email: user.email, id: user.id }; // ✅ Store user in session
+    res.redirect('/bookerdashboard');
+});
+
+
+// 🏠 Dashboard Route
+app.get('/bookerdashboard', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');  // Redirect if not logged in
+    }
+    
+    // Example VC sessions data (Replace with actual DB query)
+    const vcSessions = [];  // Example: await VCSessions.findAll()
+
+    res.render('bookerdashboard', { user: req.session.user, vcSessions });
+});
 
 
 //admin
