@@ -151,6 +151,9 @@ app.get('/forgot-password', (_, res) =>
 //User
 app.get('/users/assignuser', (_, res) => 
     res.render('users/assignuser'));
+//user-dashboard
+app.get('/user-dashboard', (_, res) => 
+    res.render('user-dashboard'));
 
 //routes
 app.use('/manageuser', addUserRoute);
@@ -165,18 +168,18 @@ function isAuthenticated(req, res, next) {
     }
 }
 // 🚀 Login Route
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+// app.post('/login', async (req, res) => {
+//     const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { email } });
+//     const user = await User.findOne({ where: { email } });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-        return res.render('login', { error: 'Invalid credentials' });
-    }
+//     if (!user || !(await bcrypt.compare(password, user.password))) {
+//         return res.render('login', { error: 'Invalid credentials' });
+//     }
 
-    req.session.user = { email: user.email, id: user.id }; // ✅ Store user in session
-    res.redirect('/bookerdashboard');
-});
+//     req.session.user = { email: user.email, id: user.id }; // ✅ Store user in session
+//     res.redirect('/bookerdashboard');
+// });
 
 
 // 🏠 Dashboard Route
