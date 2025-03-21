@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin"); // Ensure this path is correct
 const User = require('../models/user'); // Import Mongoose User model
+// const { User } = require('../models');
 require("dotenv").config(); // Load environment variables
 
 // Admin Login Route
@@ -29,6 +30,23 @@ router.post("/admin/login", async (req, res) => {
     } catch (error) {
         console.error("Admin login error:", error);
         res.status(500).json({ message: "Server error" });
+    }
+});
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const user = await User.findOne({ where: { email } });
+
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.render('login', { error: 'Invalid credentials' });
+        }
+
+        req.session.user = { email: user.email, id: user.id };
+        res.redirect('/bookerdashboard');
+    } catch (error) {
+        console.error('Login Error:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
 
