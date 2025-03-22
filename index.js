@@ -51,15 +51,8 @@ const vcms = mongoose.connection;
 
 module.exports = app;
 
-// module.exports = vcms; // Export connection
-
-//Routes
+//Routes Middleware
 app.use("/auth", require("./routes/auth")); // Ensure this path is correct
-
-
-// ✅ Middleware
-
-
 app.use('/', authRoutes);
 app.use('/views/manageuser', userRoutes);
 // const userRoutes = require('./routes/userRoutes');
@@ -507,45 +500,93 @@ app.get('/forget-password', (_, res) => res.render('forget-password'));
 // app.get('/manageuser/add_user', (_, res) => res.render('manageuser/add_user'));
 
 // 🔵 **Fix the User Creation Route**
-app.post("/manageuser/add_user", async (req, res) => {
-    try {
-        const { user_group, store, username, email, password, phone } = req.body;
+// app.post("/manageuser/add_user", async (req, res) => {
+//     try {
+//         const { user_group, store, username, email, password, phone } = req.body;
 
-        if (!user_group || !store || !username || !email || !password || !phone) {
-            return res.status(400).json({ message: "❌ All fields are required!" });
+//         if (!user_group || !store || !username || !email || !password || !phone) {
+//             return res.status(400).json({ message: "❌ All fields are required!" });
+//         }
+
+//         const hashedPassword = await bcrypt.hash(password, 10);
+
+//         const newUser = new User({
+//             user_group,
+//             store,
+//             username,
+//             email,
+//             password: hashedPassword,
+//             phone
+//         });
+
+//         await newUser.save();
+//         res.status(201).json({ message: "✅ User added successfully!" });
+
+//     } catch (error) {
+//         console.error("Error adding user:", error);
+//         res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
+//     }
+// });
+
+
+// router.post('/add_user', async (req, res) => {
+//     console.log("📥 Received data from frontend:", req.body);  // Debugging log
+
+//     try {
+//         const newUser = new User(req.body);
+//         await newUser.save();
+//         res.status(201).send("User created successfully!");
+//     } catch (error) {
+//         console.error("❌ Error:", error);
+//         res.status(400).send(error.message);
+//     }
+// });
+router.post('/add_user', async (req, res) => {
+    try {
+        const { user_group, store, username, email, phone, status, password, confirmPassword } = req.body;
+
+        // ✅ Check if passwords match
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: "❌ Passwords do not match. Please try again!" });
         }
 
+        // ✅ Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ message: "⚠️ User already exists." });
+        }
+
+        // ✅ Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // ✅ Create new user
         const newUser = new User({
             user_group,
             store,
             username,
             email,
+            phone,
+            status,
             password: hashedPassword,
-            phone
         });
 
+        // ✅ Save user to database
         await newUser.save();
-        res.status(201).json({ message: "✅ User added successfully!" });
 
-    } catch (error) {
-        console.error("Error adding user:", error);
-        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
-    }
-});
+        // ✅ Return success message with Login Button
+        res.status(201).send(`
+            <div style="text-align: center; font-family: Arial, sans-serif;">
+                <h2 style="color: green;">✅ User created successfully!</h2>
+                <p>You can now log in using your credentials.</p>
+                <a href="/login" style="display: inline-block; padding: 10px 20px; margin-top: 10px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
+                    🔑 Login Now
+                </a>
+            </div>
+        `);
 
-
-router.post('/add_user', async (req, res) => {
-    console.log("📥 Received data from frontend:", req.body);  // Debugging log
-
-    try {
-        const newUser = new User(req.body);
-        await newUser.save();
-        res.status(201).send("User created successfully!");
     } catch (error) {
         console.error("❌ Error:", error);
-        res.status(400).send(error.message);
+        res.status(500).json({ message: "🚨 Internal Server Error. Please try again." });
     }
 });
 
