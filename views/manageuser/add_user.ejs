@@ -7,7 +7,7 @@
  
     <script defer>
         document.addEventListener('DOMContentLoaded', () => {
-            const userForm = document.getElementById(userForm);
+            const userForm = document.getElementById('userForm'); // ✅ Fixed form ID reference
         
             if (!userForm) {
                 console.error("❌ Form not found! Check your HTML.");
@@ -23,45 +23,32 @@
                 const store = document.getElementById('store').value;
                 const username = document.getElementById('username').value;
                 const email = document.getElementById('email').value;
-                const phone = document.getElementById('phone').value;  // ✅ Updated field name
+                const phone = document.getElementById('phone').value;
                 const status = document.getElementById('status').value;
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
         
                 console.log("📋 Collected form data:", { user_group, store, username, email, phone, status });
         
-                if (!userGroup || !username || !email || !phone || !status || !password || !confirmPassword) {
+                // ✅ Check if any required field is empty
+                if (!user_group || !store || !username || !email || !phone || !status || !password || !confirmPassword) {
                     alert('⚠️ Please fill in all required fields.');
                     return;
                 }
         
+                // ✅ Check if passwords match
                 if (password !== confirmPassword) {
-                    alert('⚠️ Passwords do not match.');
+                    alert('❌ Passwords do not match. Please try again.');
                     return;
                 }
         
-                // ✅ Correct field names as expected by backend
-                
-        //         const userData = { 
-        //     user_group, 
-        //     store, 
-        //     username, 
-        //     email, 
-        //     phone,
-        //     status, 
-        //     password: hashedPassword
-        // };
-
-        // changed to below by krish
-        const add_user = new User({ user_group, store, username, email, phone, status, password: hashedPassword });
-
+                // ✅ Send data to the backend (NO "hashedPassword" in frontend)
+                const userData = { user_group, store, username, email, phone, status, password };
         
-
-
                 fetch('/manageuser/add_user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(add_user), // userData to add_user chnged done by krishna
+                    body: JSON.stringify(userData), // ✅ Send plain object, NOT `new User()`
                 })
                 .then(response => {
                     if (response.status === 409) {
@@ -75,9 +62,7 @@
                 .then(message => {
                     console.log("✅ Server Response:", message);
                     alert(message || 'User created successfully!');
-                    // userForm.reset();
-                    // ✅ Redirect to Admin page after success
-                      window.location.href = "/admin";
+                    window.location.href = "/admin"; // ✅ Redirect after success
                 })
                 .catch(error => {
                     console.error("❌ Error:", error);
@@ -88,7 +73,8 @@
                     }
                 });
             });
-        });        
+        });
+        
     </script>
 </head>
 <body>
