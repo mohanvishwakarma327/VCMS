@@ -154,6 +154,9 @@ app.get('/users/assignuser', (_, res) =>
 //user-dashboard
 app.get('/user-dashboard', (_, res) => 
     res.render('user-dashboard'));
+// admin-dashboard 22 march by krishna
+app.get('/admin-dashboard', (_, res) => 
+    res.render('admin-dashboard'));
 
 //routes
 app.use('/manageuser', addUserRoute);

@@ -67,7 +67,7 @@
     </form>    
 </body>
 
-<script>
+<!-- <script>
     document.getElementById("loginForm").addEventListener("submit", async function(event) {
         event.preventDefault(); // Prevent default form submission
 
@@ -101,7 +101,43 @@
             alert("🚨 Something went wrong! Please try again.");
         }
     });
+</script> -->
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert(result.message || "✅ Login successful!");
+
+            // ✅ Redirect based on user_group
+            if (result.user_group === "store") {
+                window.location.href = "/user-dashboard"; // Update with actual admin page URL
+            } else {
+                 window.location.href = "/admin"; // Update with actual user page URL
+            }
+        } else {
+            alert(result.message || "❌ Login failed! Please check your credentials.");
+        }
+
+    } catch (error) {
+        console.error("❌ Error logging in:", error);
+        alert("🚨 Something went wrong! Please try again.");
+    }
+});
 </script>
+
 
 <script src="index.js"></script>
 </html>

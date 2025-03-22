@@ -38,8 +38,8 @@ router.post('/add_user', async (req, res) => {
             <div style="text-align: center; font-family: Arial, sans-serif;">
                 <h2 style="color: green;">✅ User created successfully!</h2>
                 <p>You can now log in using your credentials.</p>
-                <a href="/login" style="display: inline-block; padding: 10px 20px; margin-top: 10px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
-                    🔑 Login Now
+                <a href="/admin" style="display: inline-block; padding: 10px 20px; margin-top: 10px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
+                    🔑 Go to Back
                 </a>
             </div>
         `);

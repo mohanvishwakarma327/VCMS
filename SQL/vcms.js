@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 
 // ✅ Users Schema
 const userSchema = new mongoose.Schema({
-    user_group: { type: String, enum: ['Admin', 'Manager', 'Staff'], required: true },
+    user_group: { type: String, enum: ['Admin', 'store', 'vnoc'], required: true },
     store: { type: String, required: true },
     username: { type: String, required: true },
     email: { type: String, unique: true, required: true },
