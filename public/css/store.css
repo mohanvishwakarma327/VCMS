@@ -1,0 +1,153 @@
+/* GENERAL STYLES */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
+}
+
+/* HEADER */
+.header {
+    background: linear-gradient(to right, #004aad, #00aaff);
+    padding: 20px;
+    color: white;
+    text-align: center;
+}
+
+.user-name {
+    font-weight: bold;
+}
+
+/* NAVBAR */
+.navbar {
+    background: #004aad;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.navbar ul li {
+    position: relative;
+    margin: 0 10px;
+}
+
+.navbar ul li a {
+    text-decoration: none;
+    color: white;
+    padding: 12px 20px;
+    display: block;
+    font-size: 16px;
+    transition: 0.3s ease;
+}
+
+.navbar ul li a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+/* DROPDOWN MENU */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: white;
+    min-width: 200px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    overflow: hidden;
+    top: 40px;
+    z-index: 100;
+}
+
+.dropdown-content a {
+    color: #004aad;
+    padding: 10px 15px;
+    display: block;
+    transition: 0.3s ease-in-out;
+}
+
+.dropdown-content a:hover {
+    background: #e0f0ff;
+    color: #002a6b;
+}
+
+/* SHOW DROPDOWN ON HOVER */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* CONTAINER */
+.container {
+    max-width: 800px;
+    margin: 30px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* FORM */
+form label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+form button {
+    margin-top: 15px;
+    background: #004aad;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+form button:hover {
+    background: #003380;
+}
+
+/* CONFIRMATION TABLE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th,
+table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+table th {
+    background: #004aad;
+    color: white;
+}
+
+/* FOOTER */
+.footer {
+    text-align: center;
+    padding: 10px;
+    background: #004aad;
+    color: white;
+    margin-top: 20px;
+}

@@ -1,100 +1,93 @@
-<!DOCTYPE html>  
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VCNow - Book a VC Session</title>
-    <link rel="stylesheet" href="/css/booker.css">
-    <script>
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(section => section.classList.remove('active-section'));
-            document.getElementById(sectionId).classList.add('active-section');
-        }
-    </script>
+    <title>VC Booking</title>
+    <link rel="stylesheet" href="/css/store.css">
 </head>
 <body>
 
     <!-- HEADER -->
     <div class="header">
-        <img src="/css/img/vcn.png" alt="VCNow Logo">
-        <h1>VCNow - Book a VC Session</h1>
+        <h1>Welcome, 
+            <% if (typeof user !== 'undefined' && user) { %>
+                <span class="user-name"><%= user.name || user.email %> (Corporate VC Coordinator)</span>
+            <% } else { %>
+                <span class="user-name">Guest</span>
+            <% } %>
+        </h1>
     </div>
 
+
     <!-- NAVBAR -->
-    <nav> 
-        <a href="#" onclick="showSection('bookVC')">Book New VC</a>
-        <a href="#" onclick="showSection('confirmVC')">Find/Confirm VC</a>
-        <a href="#" onclick="showSection('vnocConfirm')">VNOC Confirmations</a>
-        <a href="/logout" class="logout-btn">Logout</a>
-        <div class="user-info">
-            <% if (typeof user !== 'undefined' && user && user.email) { %>
-                <span id="userEmail"><%= user.email %></span>
-            <% } else { %>
-                <span id="userEmail">Guest</span>
-            <% } %>
-        </div>       
+    <nav class="navbar">
+        <ul>
+            <li><a href="#">Transaction</a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">My Account</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Postpaid VC Booking</a>
+                <div class="dropdown-content">
+                    <a href="#">Booking New</a>
+                    <a href="#">Edit VC Booking</a>
+                    <a href="#">Reschedule VC Booking</a>
+                    <a href="#">Cancellation VC Booking</a>
+                </div>
+            </li>
+            <li><a href="#confirmVC">Confirmation</a></li>
+        </ul>
     </nav>
 
     <!-- BOOKING FORM -->
-    <div class="container section active-section" id="bookVC">
-        <h2>Book a VC Session</h2>
-        <form action="/bookerdashboard" method="post">
-            <label for="companyName">Company Name:</label>
-            <input type="text" name="companyName" required>
+    <div class="container">
+        <h2>VC BOOKING</h2>
+        <form action="/bookVC" method="post">
+            <label for="companyName">Name of Organisation:</label>
+            <input type="text" name="companyName" value="Hindustan Unilever Ltd-W215" readonly>
 
-            <label for="chairperson">Chairperson:</label>
-            <input type="text" name="chairperson" required>
+            <label for="chairperson">Name of Chairperson:</label>
+            <select name="chairperson" required>
+                <option value="">Please Select</option>
+                <option value="Chairperson A">Chairperson A</option>
+                <option value="Chairperson B">Chairperson B</option>
+            </select>
+
+            <label for="designation">Designation:</label>
+            <select name="designation" required>
+                <option value="">Please Select</option>
+                <option value="Manager">Manager</option>
+                <option value="Director">Director</option>
+            </select>
 
             <label for="contactNumber">Contact Number:</label>
-            <input type="tel" name="contactNumber" required>
+            <input type="tel" name="contactNumber" value="98114 7771" required>
 
-            <label for="email">Email:</label>
-            <input type="email" name="email" required>
+            <label for="email">E-Mail ID:</label>
+            <input type="email" name="email" value="ravishankarW215@gm.com" required>
+
+            <label for="bookedBy">Booked By:</label>
+            <input type="radio" name="bookedBy" value="VC Now Center" required> VC Now Center
+            <input type="radio" name="bookedBy" value="Corporate" required> Corporate
 
             <label for="vcPurpose">VC Purpose:</label>
             <select name="vcPurpose" required>
-                <option value="">-- Select Purpose --</option>
-                <option value="business_meeting">Business Meeting</option>
-                <option value="training_session">Training Session</option>
-                <option value="client_meeting">Client Meeting</option>
-                <option value="team_meeting">Team Meeting</option>
-                <option value="interview">Interview</option>
-                <option value="presentation">Presentation</option>
-                <option value="other">Other</option>
+                <option value="">Please Select</option>
+                <option value="Business Meeting">Business Meeting</option>
+                <option value="Training Session">Training Session</option>
             </select>
 
             <label for="remark">Remark:</label>
-            <textarea name="remark" rows="3"></textarea>
+            <textarea name="remark"></textarea>
 
-            <label for="vcDuration">VC Duration (hours):</label>
+            <label for="vcDuration">VC Duration:</label>
             <input type="number" name="vcDuration" min="0.5" step="0.5" required>
 
-            <label for="vcType">VC Type:</label>
-            <select name="vcType" required>
-                <option value="audio">Audio</option>
-                <option value="video">Video</option>
-                <option value="hybrid">Both</option>
-            </select>
-
-            <label for="vcStartDate">VC Start Date & Time:</label>
+            <label>Start Date & Time:</label>
             <input type="datetime-local" name="vcStartDate" required>
 
-            <label for="vcEndDate">VC End Date & Time:</label>
+            <label>End Date & Time:</label>
             <input type="datetime-local" name="vcEndDate" required>
-
-            <label for="recording">Recording Required:</label>
-            <select name="recording" required>
-                <option value="">-- Choose --</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-            </select>
-
-            <label for="billingSection">Billing Section:</label>
-            <select name="billingSection" required>
-                <option value="">-- Choose --</option>
-                <option value="prepaid">Prepaid</option>
-                <option value="postpaid">Postpaid</option>
-            </select>
 
             <button type="submit">Book VC Session</button>
         </form>
@@ -103,7 +96,7 @@
     <!-- CONFIRMATION SECTION -->
     <div class="container section" id="confirmVC">
         <h2>Find/Confirm VC Session</h2>
-        <table border="1">
+        <table>
             <tr>
                 <th>Company</th>
                 <th>Chairperson</th>
@@ -118,61 +111,15 @@
                         <td><%= session.chairperson %></td>
                         <td><%= new Date(session.vcStartDate).toLocaleString() %></td>
                         <td><%= new Date(session.vcEndDate).toLocaleString() %></td>
-                        <td>
-                            <% if (session.status === "Approved") { %>
-                                ✅ Approved
-                            <% } else if (session.status === "Rejected") { %>
-                                ❌ Rejected
-                            <% } else { %>
-                                ⏳ Pending
-                            <% } %>
-                        </td>
+                        <td><%= session.status === "Approved" ? "✅ Approved" : session.status === "Rejected" ? "❌ Rejected" : "⏳ Pending" %></td>
                     </tr>
                 <% }) %>
             <% } else { %>
-                <tr>
-                    <td colspan="5">No VC sessions found.</td>
-                </tr>
+                <tr><td colspan="5">No VC sessions found.</td></tr>
             <% } %>
         </table>
     </div>
 
-    <!-- VNOC CONFIRMATION SECTION
-    <div class="container section" id="vnocConfirm">
-        <h2>VNOC Confirmations</h2>
-        <table border="1">
-            <tr>
-                <th>Company</th>
-                <th>Chairperson</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Status</th>
-                <th>Zoom Link</th>
-            </tr>
-            <% if (typeof vnocConfirmations !== 'undefined' && vnocConfirmations.length > 0) { %>
-                <% vnocConfirmations.forEach(session => { %>
-                    <tr>
-                        <td><%= session.companyName %></td>
-                        <td><%= session.chairperson %></td>
-                        <td><%= new Date(session.vcStartDate).toLocaleString() %></td>
-                        <td><%= new Date(session.vcEndDate).toLocaleString() %></td>
-                        <td><%= session.status %></td>
-                        <td>
-                            <% if (session.status === "Approved") { %>
-                                <a href="<%= session.zoomLink %>" target="_blank">Join VC</a>
-                            <% } else { %>
-                                Not available
-                            <% } %>
-                        </td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
-                <tr>
-                    <td colspan="6">No VNOC confirmations available.</td>
-                </tr>
-            <% } %>
-        </table>
-    </div> -->
     <div class="footer">
         <p>Powered by VCNow &copy; 2025. All rights reserved.</p>
     </div>
