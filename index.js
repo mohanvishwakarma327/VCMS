@@ -21,6 +21,8 @@ const dotenv = require("dotenv");
 const MongoStore = require('connect-mongo'); //Mohan
 const jwt = require('jsonwebtoken');
 // const deleteUserRoute = require('./routes/delete_user'); 
+const vnocRoutes = require("./routes/vnoc"); // Ensure the correct path
+
 
 
 const authenticateJWT = (req, res, next) => {
@@ -52,6 +54,9 @@ const vcms = mongoose.connection;
 module.exports = app;
 
 //Routes Middleware
+
+// Routes
+app.use("/vnoc", vnocRoutes);
 app.use("/auth", require("./routes/auth")); // Ensure this path is correct
 app.use('/', authRoutes);
 app.use('/views/manageuser', userRoutes);
@@ -150,10 +155,14 @@ app.get('/user-dashboard', (_, res) =>
 // admin-dashboard 22 march by krishna
 app.get('/admin-dashboard', (_, res) => 
     res.render('admin-dashboard'));
-
 // write on 22 march by krishna
   app.get('/store', (_, res) => 
     res.render('store'));
+  // Default Route (Redirect to VNOC Dashboard)
+app.get("/vnoc", (req, res) => {
+    res.redirect("/vnoc");
+});
+
 
 //routes
 app.use('/manageuser', addUserRoute);
@@ -204,7 +213,7 @@ app.post('/login', async (req, res) => {
 
         // ✅ Set session & return success response
         req.session.user = user; 
-        res.status(200).json({ message: "✅ Login ok!" });
+        res.status(200).json({ message: "✅ Login successfull!" });
 
     } catch (error) {
         console.error("❌ Error during login:", error);
@@ -213,7 +222,58 @@ app.post('/login', async (req, res) => {
 });
 
 // ✅ Admin Login Route (MongoDB + Mongoose)  change on 19-03-2025 by krish
-app.post('/login', async (req, res) => {  
+// app.post('/login', async (req, res) => {  
+//     try {
+//         const { email, password } = req.body;
+
+//         // 🛑 Validate Input
+//         if (!email || !password) {
+//             return res.status(400).json({ message: "❌ Email and password are required." });
+//         }
+
+//         // 🔍 Find admin user in MongoDB
+//         const user = await User.findOne({ email, user_group: 'Admin' });
+//         if (!user) {
+//             return res.status(401).json({ message: "❌ Invalid credentials or not an admin." });
+//         }
+
+//         // 🔑 Compare hashed passwords
+//         const isMatch = bcrypt.compareSync(password, user.password);
+//         if (!isMatch) {
+//             return res.status(401).json({ message: "❌ Invalid credentials." });
+//         }
+
+//         // ✅ Store Minimal User Data in Session
+//         req.session.user = {
+//             id: user._id,
+//             username: user.username,
+//             email: user.email,
+//             user_group: user.user_group
+//         };
+
+//         // res.redirect('/admin'); // Redirect to admin panel
+
+//         // write on 24 march by krishna
+//           // 🎯 Redirect based on user group
+//           if (user.user_group === 'Admin') {
+//             return res.redirect('/admin'); // Redirect to Admin Dashboard
+//         } else if (user.user_group === 'Store') {
+//             return res.redirect('/store'); // Redirect to Store Page
+//         } else if (user.user_group === 'vnoc') {
+//             return res.redirect('/vnoc-dashboard'); // write on 24-03 krishna 
+//         }
+//          else {
+//             return res.status(403).json({ message: "❌ Access Denied" });
+//         }
+
+//     } catch (error) {
+//         console.error("❌ Error during login:", error);
+//         res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
+//     }
+// });
+
+// ✅ Login Route write on 24-march krishna
+app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -222,16 +282,17 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ message: "❌ Email and password are required." });
         }
 
-        // 🔍 Find admin user in MongoDB
-        const user = await User.findOne({ email, user_group: 'Admin' });
+        // 🔍 Find user in MongoDB (Case-insensitive email)
+        const user = await User.findOne({ email: email.toLowerCase() });
+
         if (!user) {
-            return res.status(401).json({ message: "❌ Invalid credentials or not an admin." });
+            return res.status(401).json({ message: "❌ Invalid email or password." });
         }
 
-        // 🔑 Compare hashed passwords
-        const isMatch = bcrypt.compareSync(password, user.password);
+        // 🔑 Compare hashed passwords (Async)
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ message: "❌ Invalid credentials." });
+            return res.status(401).json({ message: "❌ Invalid email or password." });
         }
 
         // ✅ Store Minimal User Data in Session
@@ -239,21 +300,20 @@ app.post('/login', async (req, res) => {
             id: user._id,
             username: user.username,
             email: user.email,
-            user_group: user.user_group
+            user_group: user.user_group.toLowerCase() // Normalize case
         };
 
-        // res.redirect('/admin'); // Redirect to admin panel
-
-        // write on 24 march by krishna
-          // 🎯 Redirect based on user group
-          if (user.user_group === 'Admin') {
-            return res.redirect('/admin'); // Redirect to Admin Dashboard
-        } else if (user.user_group === 'Store') {
-            return res.redirect('/store'); // Redirect to Store Page
-        } else {
-            return res.status(403).json({ message: "❌ Access Denied" });
+        // 🎯 Redirect based on user group
+        switch (req.session.user.user_group) {
+            case 'admin':
+                return res.redirect('/admin'); // Redirect to Admin Dashboard
+            case 'store':
+                return res.redirect('/store'); // Redirect to Store Page
+            case 'vnoc':
+                return res.redirect('/vnoc'); // Redirect to VNOC Dashboard
+            default:
+                return res.status(403).json({ message: "❌ Access Denied" });
         }
-
     } catch (error) {
         console.error("❌ Error during login:", error);
         res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
@@ -271,9 +331,20 @@ app.get('/store', (req, res) => {
 
     res.render('store', { user: req.session.user, vcSessions });
 });
+// write on 24 marchh by krishna
+app.get('/vnoc', async (req, res) => { 
+    try {
+        // Fetch bookings from MongoDB
+        const bookings = await Booking.find(); // Get all bookings
 
+        console.log("Bookings fetched:", bookings); // Debugging log
 
-
+        res.render('vnoc', { bookings }); // Pass bookings to EJS template
+    } catch (error) {
+        console.error("Error fetching bookings:", error);
+        res.status(500).send("Error fetching bookings");
+    }
+});
 
 //admin
 router.get('/admin', async (req, res) => {
@@ -287,36 +358,82 @@ router.get('/admin', async (req, res) => {
 });
 
 // change by krishna on 24-03-2025
+// app.get('/admin', isAuthenticated, async (req, res) => { 
+//     try {
+//         // Ensure the user is authenticated
+//         if (!req.session.user) {
+//             return res.redirect('/login'); // Redirect to login if no session
+//         }
+
+//         const user = req.session.user;
+
+//         // ✅ If user_group = "store", render store.ejs
+//         if (user.user_group.toLowerCase() === "store") {
+//             // return res.render('store', { user }); 
+//             const users = await User.find({}, "id username email");
+//             return res.render('store', { user, users });
+//         }
+
+//         // ✅ If user_group = "admin", render admin.ejs
+//         if (user.user_group.toLowerCase() === "admin") {
+//             const users = await User.find({}, "id username email");
+//             return res.render('admin', { user, users });
+//         }
+
+//         // ❌ If user has an unknown role, deny access
+//         return res.status(403).send("❌ Access Denied - Unknown Role");
+
+//     } catch (error) {
+//         console.error("❌ Database error:", error);
+//         res.status(500).send("❌ Database error! Try again.");
+//     }
+// });
+
+// ✅ Updated on 24-03-2025 by Krishna
 app.get('/admin', isAuthenticated, async (req, res) => { 
     try {
+        console.log("🔍 Checking Session User:", req.session.user); // Debugging log
+
         // Ensure the user is authenticated
         if (!req.session.user) {
+            console.log("❌ No user found in session. Redirecting to login.");
             return res.redirect('/login'); // Redirect to login if no session
         }
 
         const user = req.session.user;
 
-        // ✅ If user_group = "store", render store.ejs
-        if (user.user_group.toLowerCase() === "store") {
-            // return res.render('store', { user }); 
-            const users = await User.find({}, "id username email");
-            return res.render('store', { user, users });
+        console.log("🎯 User Role:", user.user_group); // Log user role
+        console.log("🧐 Type of user_group:", typeof user.user_group); // Debugging type
+
+        // Ensure user_group is a valid string
+        if (!user.user_group || typeof user.user_group !== 'string') {
+            console.log("❌ Invalid or missing user_group.");
+            return res.status(403).send("❌ Access Denied - Invalid user role.");
         }
 
-        // ✅ If user_group = "admin", render admin.ejs
-        if (user.user_group.toLowerCase() === "admin") {
-            const users = await User.find({}, "id username email");
-            return res.render('admin', { user, users });
+        // Convert user role to lowercase for case-insensitive matching
+        const role = user.user_group.toLowerCase();
+
+        // 🎯 Redirect based on user role
+        switch (role) {
+            case "admin":
+                const users = await User.find({}, "id username email"); // Fetch users for admin
+                return res.render('admin', { user, users }); // ✅ Render admin.ejs
+            case "store":
+                const storeUsers = await User.find({}, "id username email");
+                return res.render('store', { user, users: storeUsers }); // ✅ Render store.ejs
+            case "vnoc":
+                return res.render('vnoc', { user }); // ✅ Render vnoc.ejs
+            default:
+                console.log("⚠️ Unknown user role detected:", user.user_group);
+                return res.status(403).send(`❌ Access Denied - Unknown role: ${user.user_group}`);
         }
-
-        // ❌ If user has an unknown role, deny access
-        return res.status(403).send("❌ Access Denied - Unknown Role");
-
     } catch (error) {
         console.error("❌ Database error:", error);
         res.status(500).send("❌ Database error! Try again.");
     }
 });
+
 
 
 // only for check by krishna on 22 march
@@ -621,6 +738,46 @@ app.get('/logout', (req, res) => {
     req.session.destroy(() => {
         res.redirect('/login');
     });
+});
+
+
+// write on 24 march by krishna
+
+// 🔹 Define VNOC Route Here
+app.get('/vnoc', isAuthenticated, async (req, res) => {
+    try {
+        console.log("🔍 Checking Session User:", req.session.user); // Debugging log
+
+        if (!req.session.user) {
+            console.log("❌ No user found in session. Redirecting to login.");
+            return res.redirect('/login'); 
+        }
+
+        const user = req.session.user;
+
+        if (user.user_group.toLowerCase() !== "vnoc") {
+            return res.status(403).send("❌ Access Denied - You are not authorized to view this page.");
+        }
+
+        // ✅ Fetch booking counts from MongoDB
+        const pendingBookings = await Booking.countDocuments({ status: "Pending" });
+        const approvedBookings = await Booking.countDocuments({ status: "Approved" });
+        const rejectedBookings = await Booking.countDocuments({ status: "Rejected" });
+
+        console.log("📊 Booking Counts:", { pendingBookings, approvedBookings, rejectedBookings });
+
+        // ✅ Pass booking data to vnoc.ejs
+        res.render('vnoc', { 
+            user,
+            pendingBookings,
+            approvedBookings,
+            rejectedBookings
+        });
+
+    } catch (error) {
+        console.error("❌ Error fetching VNOC data:", error);
+        res.status(500).send("❌ Internal Server Error");
+    }
 });
 
 // ✅ Start Server
