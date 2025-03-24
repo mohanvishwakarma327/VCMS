@@ -74,12 +74,9 @@ function isAuthenticated(req, res, next) {
 }
 
 // Route to render store page if user_group is "store"
-app.get("/store", async (req, res) => {
-    try {
-        // Fetch VC Sessions from your database
-        const vcSessions = await db.query("SELECT * FROM vc_sessions"); // Adjust as per your DB query method
+router.get('/store', isAuthenticated, (req, res) => {
+    const user = req.session.user || null; // Ensure 'user' is always defined
 
-<<<<<<< HEAD
     if (!user) {
         return res.redirect("/login"); // Redirect if no user is found
     }
@@ -92,12 +89,6 @@ app.get("/store", async (req, res) => {
     } 
     else {
         return res.redirect('/user-dashboard'); // ✅ Redirect others to user dashboard
-=======
-        res.render("store", { vcSessions }); // Pass vcSessions to EJS
-    } catch (error) {
-        console.error("Error fetching VC Sessions:", error);
-        res.render("store", { vcSessions: [] }); // Pass empty array if there's an error
->>>>>>> 8382e6d0f10b3bc56d823b2893f7166b8144725d
     }
 });
 
@@ -116,5 +107,6 @@ router.get('/store', isAuthenticated, async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
 
 module.exports = router;
