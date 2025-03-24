@@ -29,6 +29,7 @@
 // change by krishna on 22 march 
 const express = require('express');
 const router = express.Router();
+const User = require('../models/user'); // Import User model chnge by krishna on 24 march
 
 // Middleware to check if user is logged in
 function isAuthenticated(req, res, next) {
@@ -46,11 +47,11 @@ router.get('/store', isAuthenticated, (req, res) => {
         return res.redirect("/login"); // Redirect if no user is found
     }
 
-    if (user.user_group === "admin") {
-        return res.redirect('/admin'); // Redirect admin users
+    if (user.user_group === "store") {
+        return res.redirect('/store'); // Redirect admin users
     } 
-    else if (user.user_group === "store") {
-        return res.render('store', { user }); // ✅ Render store.ejs for store users
+    else if (user.user_group === "admin") {
+        return res.render('admin', { user }); // ✅ Render store.ejs for store users
     } 
     else {
         return res.redirect('/user-dashboard'); // ✅ Redirect others to user dashboard

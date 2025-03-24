@@ -66,43 +66,8 @@
         <p><a href="/forgot-password">Forgot Password?</a></p>
     </form>    
 </body>
-
-<!-- <script>
-    document.getElementById("loginForm").addEventListener("submit", async function(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-
-        try {
-            const response = await fetch("/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
-
-            const result = await response.json();
-            
-            if (response.ok) {
-                alert(result.message || "✅ Login successful!");
-
-                // ✅ Redirect based on user role
-                if (result.role === "admin") {
-                    window.location.href = "/admin-dashboard"; // Change to actual admin page URL
-                } else {
-                    window.location.href = "/user-dashboard"; // Change to user dashboard
-                }
-            } else {
-                alert(result.message || "❌ Login failed! Please check your credentials.");
-            }
-
-        } catch (error) {
-            console.error("❌ Error logging in:", error);
-            alert("🚨 Something went wrong! Please try again.");
-        }
-    });
-</script> -->
-<script>
+<!-- change on 22 march by krishna  -->
+ <script>
 document.getElementById("loginForm").addEventListener("submit", async function(event) {
     event.preventDefault(); // Prevent default form submission
 
@@ -122,10 +87,10 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
             alert(result.message || "✅ Login successful!");
 
             // ✅ Redirect based on user_group
-            if (result.user_group === "store") {
-                window.location.href = "/user-dashboard"; // Update with actual admin page URL
+            if (result.user_group === "store") {  // // write by krishna on 22 march for check  store to admin
+                window.location.href = "/store"; // write by krishna on 22 march for check  user-dashboard to admin
             } else {
-                 window.location.href = "/admin"; // Update with actual user page URL
+                 window.location.href = "/admin"; // Update with actual user page URL change to admin to store for check by krishna
             }
         } else {
             alert(result.message || "❌ Login failed! Please check your credentials.");
@@ -137,6 +102,8 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
     }
 });
 </script>
+
+
 
 
 <script src="index.js"></script>
