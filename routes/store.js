@@ -26,10 +26,44 @@
 
 // module.exports = router;
 
-// change by krishna on 22 march 
-const express = require('express');
+// // change by krishna on 22 march 
+// const express = require('express');
+// const router = express.Router();
+// const User = require('../models/user'); // Import User model chnge by krishna on 24 march
+
+// // Middleware to check if user is logged in
+// function isAuthenticated(req, res, next) {
+//     if (req.session && req.session.user) {
+//         return next(); // Proceed if authenticated
+//     }
+//     res.redirect("/login"); // Redirect to login if not authenticated
+// }
+
+// // Route to render store page if user_group is "store"
+// router.get('/store', isAuthenticated, (req, res) => {
+//     const user = req.session.user || null; // Ensure 'user' is always defined
+
+//     if (!user) {
+//         return res.redirect("/login"); // Redirect if no user is found
+//     }
+
+//     if (user.user_group === "store") {
+//         return res.redirect('/store'); // Redirect admin users
+//     } 
+//     else if (user.user_group === "admin") {
+//         return res.render('admin', { user }); // ✅ Render store.ejs for store users
+//     } 
+//     else {
+//         return res.redirect('/user-dashboard'); // ✅ Redirect others to user dashboard
+//     }
+// });
+
+// module.exports = router;
+
+
+const express = require('express'); 
 const router = express.Router();
-const User = require('../models/user'); // Import User model chnge by krishna on 24 march
+const User = require('../models/user'); // Import User model
 
 // Middleware to check if user is logged in
 function isAuthenticated(req, res, next) {
@@ -48,14 +82,31 @@ router.get('/store', isAuthenticated, (req, res) => {
     }
 
     if (user.user_group === "store") {
-        return res.redirect('/store'); // Redirect admin users
+        return res.render('store', { user }); // ✅ Render store.ejs for store users
     } 
     else if (user.user_group === "admin") {
-        return res.render('admin', { user }); // ✅ Render store.ejs for store users
+        return res.render('admin', { user }); // ✅ Render admin.ejs for admin users
     } 
     else {
         return res.redirect('/user-dashboard'); // ✅ Redirect others to user dashboard
     }
 });
+
+router.get('/store', isAuthenticated, async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.user_group !== "store") {
+            return res.redirect("/login");
+        }
+
+        const vcSessions = await Booking.find({ storeEmail: user.email });
+
+        res.render("store", { user, vcSessions }); // Pass updated bookings to store.ejs
+    } catch (error) {
+        console.error("Error fetching store bookings:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 
 module.exports = router;

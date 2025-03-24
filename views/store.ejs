@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>  
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -24,6 +24,7 @@
     <nav> 
         <a href="#" onclick="showSection('bookVC')">Book New VC</a>
         <a href="#" onclick="showSection('confirmVC')">Find/Confirm VC</a>
+        <a href="#" onclick="showSection('vnocConfirm')">VNOC Confirmations</a>
         <a href="/logout" class="logout-btn">Logout</a>
         <div class="user-info">
             <% if (typeof user !== 'undefined' && user && user.email) { %>
@@ -37,7 +38,7 @@
     <!-- BOOKING FORM -->
     <div class="container section active-section" id="bookVC">
         <h2>Book a VC Session</h2>
-        <form action="/bookerdashboard" method="post">  <!-- ✅ Fixed route (lowercase) -->
+        <form action="/bookerdashboard" method="post">
             <label for="companyName">Company Name:</label>
             <input type="text" name="companyName" required>
 
@@ -108,24 +109,70 @@
                 <th>Chairperson</th>
                 <th>Start Time</th>
                 <th>End Time</th>
+                <th>Status</th>
             </tr>
             <% if (typeof vcSessions !== 'undefined' && vcSessions.length > 0) { %>
                 <% vcSessions.forEach(session => { %>
                     <tr>
                         <td><%= session.companyName %></td>
                         <td><%= session.chairperson %></td>
-                        <td><%= new Date(session.vcStartDate).toLocaleString() %></td>  <!-- ✅ Fixed date formatting -->
-                        <td><%= new Date(session.vcEndDate).toLocaleString() %></td>    <!-- ✅ Fixed date formatting -->
+                        <td><%= new Date(session.vcStartDate).toLocaleString() %></td>
+                        <td><%= new Date(session.vcEndDate).toLocaleString() %></td>
+                        <td>
+                            <% if (session.status === "Approved") { %>
+                                ✅ Approved
+                            <% } else if (session.status === "Rejected") { %>
+                                ❌ Rejected
+                            <% } else { %>
+                                ⏳ Pending
+                            <% } %>
+                        </td>
                     </tr>
                 <% }) %>
             <% } else { %>
                 <tr>
-                    <td colspan="4">No VC sessions found.</td>
+                    <td colspan="5">No VC sessions found.</td>
                 </tr>
             <% } %>
         </table>
     </div>
 
+    <!-- VNOC CONFIRMATION SECTION
+    <div class="container section" id="vnocConfirm">
+        <h2>VNOC Confirmations</h2>
+        <table border="1">
+            <tr>
+                <th>Company</th>
+                <th>Chairperson</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+                <th>Zoom Link</th>
+            </tr>
+            <% if (typeof vnocConfirmations !== 'undefined' && vnocConfirmations.length > 0) { %>
+                <% vnocConfirmations.forEach(session => { %>
+                    <tr>
+                        <td><%= session.companyName %></td>
+                        <td><%= session.chairperson %></td>
+                        <td><%= new Date(session.vcStartDate).toLocaleString() %></td>
+                        <td><%= new Date(session.vcEndDate).toLocaleString() %></td>
+                        <td><%= session.status %></td>
+                        <td>
+                            <% if (session.status === "Approved") { %>
+                                <a href="<%= session.zoomLink %>" target="_blank">Join VC</a>
+                            <% } else { %>
+                                Not available
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="6">No VNOC confirmations available.</td>
+                </tr>
+            <% } %>
+        </table>
+    </div> -->
     <div class="footer">
         <p>Powered by VCNow &copy; 2025. All rights reserved.</p>
     </div>

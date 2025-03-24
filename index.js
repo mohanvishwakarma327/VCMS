@@ -21,6 +21,8 @@ const dotenv = require("dotenv");
 const MongoStore = require('connect-mongo'); //Mohan
 const jwt = require('jsonwebtoken');
 // const deleteUserRoute = require('./routes/delete_user'); 
+const vnocRoutes = require("./routes/vnoc"); // Ensure the correct path
+
 
 
 const authenticateJWT = (req, res, next) => {
@@ -52,6 +54,9 @@ const vcms = mongoose.connection;
 module.exports = app;
 
 //Routes Middleware
+
+// Routes
+app.use("/vnoc", vnocRoutes);
 app.use("/auth", require("./routes/auth")); // Ensure this path is correct
 app.use('/', authRoutes);
 app.use('/views/manageuser', userRoutes);
@@ -150,10 +155,14 @@ app.get('/user-dashboard', (_, res) =>
 // admin-dashboard 22 march by krishna
 app.get('/admin-dashboard', (_, res) => 
     res.render('admin-dashboard'));
-
 // write on 22 march by krishna
   app.get('/store', (_, res) => 
     res.render('store'));
+  // Default Route (Redirect to VNOC Dashboard)
+app.get("/", (req, res) => {
+    res.redirect("/vnoc/dashboard");
+});
+
 
 //routes
 app.use('/manageuser', addUserRoute);
@@ -193,9 +202,20 @@ app.get('/store', (req, res) => {
 
     res.render('store', { user: req.session.user, vcSessions });
 });
+//vnoc booking page
+app.get('/vnoc', async (req, res) => {
+    try {
+        // Fetch bookings from the database
+        const [bookings] = await db.execute("SELECT * FROM bookings"); // Ensure your database query is correct
 
+        console.log("Bookings fetched:", bookings); // Debugging log
 
-
+        res.render('vnoc', { bookings }); // Pass bookings to EJS template
+    } catch (error) {
+        console.error("Error fetching bookings:", error);
+        res.status(500).send("Error fetching bookings");
+    }
+});
 
 //admin
 router.get('/admin', async (req, res) => {
