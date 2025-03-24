@@ -181,6 +181,84 @@ function isAuthenticated(req, res, next) {
 //     res.redirect('/bookerdashboard');
 // });
 
+app.post('/login', async (req, res) => { 
+    try {
+        const { email, password } = req.body;
+
+        // 🛑 Validate input
+        if (!email || !password) {
+            return res.status(400).json({ message: "❌ Email and password are required!" });
+        }
+
+        // 🔍 Find user by email in MongoDB
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: "❌ User not found!" });
+        }
+
+        // 🔑 Compare hashed passwords
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(400).json({ message: "❌ Incorrect password!" });
+        }
+
+        // ✅ Set session & return success response
+        req.session.user = user; 
+        res.status(200).json({ message: "✅ Login ok!" });
+
+    } catch (error) {
+        console.error("❌ Error during login:", error);
+        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
+    }
+});
+
+// ✅ Admin Login Route (MongoDB + Mongoose)  change on 19-03-2025 by krish
+app.post('/login', async (req, res) => {  
+    try {
+        const { email, password } = req.body;
+
+        // 🛑 Validate Input
+        if (!email || !password) {
+            return res.status(400).json({ message: "❌ Email and password are required." });
+        }
+
+        // 🔍 Find admin user in MongoDB
+        const user = await User.findOne({ email, user_group: 'Admin' });
+        if (!user) {
+            return res.status(401).json({ message: "❌ Invalid credentials or not an admin." });
+        }
+
+        // 🔑 Compare hashed passwords
+        const isMatch = bcrypt.compareSync(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: "❌ Invalid credentials." });
+        }
+
+        // ✅ Store Minimal User Data in Session
+        req.session.user = {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            user_group: user.user_group
+        };
+
+        // res.redirect('/admin'); // Redirect to admin panel
+
+        // write on 24 march by krishna
+          // 🎯 Redirect based on user group
+          if (user.user_group === 'Admin') {
+            return res.redirect('/admin'); // Redirect to Admin Dashboard
+        } else if (user.user_group === 'Store') {
+            return res.redirect('/store'); // Redirect to Store Page
+        } else {
+            return res.status(403).json({ message: "❌ Access Denied" });
+        }
+
+    } catch (error) {
+        console.error("❌ Error during login:", error);
+        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
+    }
+});
 
 // 🏠 Dashboard Route
 app.get('/store', (req, res) => {
@@ -220,7 +298,9 @@ app.get('/admin', isAuthenticated, async (req, res) => {
 
         // ✅ If user_group = "store", render store.ejs
         if (user.user_group.toLowerCase() === "store") {
-            return res.render('store', { user }); 
+            // return res.render('store', { user }); 
+            const users = await User.find({}, "id username email");
+            return res.render('store', { user, users });
         }
 
         // ✅ If user_group = "admin", render admin.ejs
@@ -281,36 +361,7 @@ app.get('/store', isAuthenticated, async (req, res) => {
 
 
 
-app.post('/login', async (req, res) => { 
-    try {
-        const { email, password } = req.body;
 
-        // 🛑 Validate input
-        if (!email || !password) {
-            return res.status(400).json({ message: "❌ Email and password are required!" });
-        }
-
-        // 🔍 Find user by email in MongoDB
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "❌ User not found!" });
-        }
-
-        // 🔑 Compare hashed passwords
-        const match = await bcrypt.compare(password, user.password);
-        if (!match) {
-            return res.status(400).json({ message: "❌ Incorrect password!" });
-        }
-
-        // ✅ Set session & return success response
-        req.session.user = user; 
-        res.status(200).json({ message: "✅ Login ok!" });
-
-    } catch (error) {
-        console.error("❌ Error during login:", error);
-        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
-    }
-});
 
 // Route to render assign user page
 app.get('/assignuser', (req, res) => {
@@ -344,44 +395,6 @@ const authenticateUser = (req, res, next) => {
 };
 
 app.use('/admin', authenticateUser);
-
-// ✅ Admin Login Route (MongoDB + Mongoose)  change on 19-03-2025 by krish
-app.post('/login', async (req, res) => {  
-    try {
-        const { email, password } = req.body;
-
-        // 🛑 Validate Input
-        if (!email || !password) {
-            return res.status(400).json({ message: "❌ Email and password are required." });
-        }
-
-        // 🔍 Find admin user in MongoDB
-        const user = await User.findOne({ email, user_group: 'Admin' });
-        if (!user) {
-            return res.status(401).json({ message: "❌ Invalid credentials or not an admin." });
-        }
-
-        // 🔑 Compare hashed passwords
-        const isMatch = bcrypt.compareSync(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: "❌ Invalid credentials." });
-        }
-
-        // ✅ Store Minimal User Data in Session
-        req.session.user = {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            user_group: user.user_group
-        };
-
-        res.redirect('/admin'); // Redirect to admin panel
-
-    } catch (error) {
-        console.error("❌ Error during login:", error);
-        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
-    }
-});
 
 // // ✅ Admin Dashboard Route
 // app.get('/admin', (req, res) => {
@@ -428,57 +441,6 @@ router.delete("/delete_user", async (req, res) => {   // deltet-user to delete_u
     } catch (error) {
         console.error("❌ Error deleting user:", error);
         res.status(500).json({ message: "❌ Internal Server Error" });
-    }
-});
-
-// router.delete('/delete-user', async (req, res) => {
-//     try {
-//         const { userIdentifier } = req.body;
-
-//         if (!userIdentifier) {
-//             return res.status(400).json({ message: "User ID or Email is required." });
-//         }
-
-//         // Check if the user exists
-//         const userCheckQuery = 'SELECT * FROM users WHERE id = ? OR email = ?';
-//         const [user] = await db.execute(userCheckQuery, [userIdentifier, userIdentifier]);
-
-//         if (user.length === 0) {
-//             return res.status(404).json({ message: "User not found." });
-//         }
-
-//         // Delete the user
-//         const deleteQuery = 'DELETE FROM users WHERE id = ? OR email = ?';
-//         await db.execute(deleteQuery, [userIdentifier, userIdentifier]);
-
-//         res.status(200).json({ message: "User deleted successfully." });
-//     } catch (error) {
-//         console.error("Error deleting user:", error);
-//         res.status(500).json({ message: "Internal server error." });
-//     }
-// });
-
-app.get('/admin', async (req, res) => {
-    try {
-        // 🔑 Check if user is logged in
-        if (!req.session.user) {
-            return res.redirect('/login');
-        }
-
-        // 🔍 Verify if user is an Admin
-        if (req.session.user.user_group !== "Admin") {
-            return res.status(403).send("❌ Access Denied");
-        }
-
-        // 📌 Fetch all users (id, username, email) from MongoDB
-        const users = await User.find({}, "id username email");
-
-        // 🎨 Render admin dashboard with user data
-        res.render('admin', { user: req.session.user, users });
-
-    } catch (error) {
-        console.error("❌ Database error:", error);
-        res.status(500).send("❌ Database error! Try again.");
     }
 });
 

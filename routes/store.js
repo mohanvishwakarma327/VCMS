@@ -48,10 +48,10 @@ router.get('/store', isAuthenticated, (req, res) => {
     }
 
     if (user.user_group === "store") {
-        return res.redirect('/store'); // Redirect admin users
+        return res.redirect('/store', { user }); // Redirect store users
     } 
     else if (user.user_group === "admin") {
-        return res.render('admin', { user }); // ✅ Render store.ejs for store users
+        return res.render('/admin', { user }); // ✅ Render  admin
     } 
     else {
         return res.redirect('/user-dashboard'); // ✅ Redirect others to user dashboard
