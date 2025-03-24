@@ -151,6 +151,10 @@ app.get('/user-dashboard', (_, res) =>
 app.get('/admin-dashboard', (_, res) => 
     res.render('admin-dashboard'));
 
+// write on 22 march by krishna
+  app.get('/store', (_, res) => 
+    res.render('store'));
+
 //routes
 app.use('/manageuser', addUserRoute);
 
@@ -179,7 +183,7 @@ function isAuthenticated(req, res, next) {
 
 
 // 🏠 Dashboard Route
-app.get('/bookerdashboard', (req, res) => {
+app.get('/store', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');  // Redirect if not logged in
     }
@@ -187,8 +191,10 @@ app.get('/bookerdashboard', (req, res) => {
     // Example VC sessions data (Replace with actual DB query)
     const vcSessions = [];  // Example: await VCSessions.findAll()
 
-    res.render('bookerdashboard', { user: req.session.user, vcSessions });
+    res.render('store', { user: req.session.user, vcSessions });
 });
+
+
 
 
 //admin
@@ -201,24 +207,79 @@ router.get('/admin', async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
-app.get('/admin', isAuthenticated, async (req, res) => {
+
+// change by krishna on 24-03-2025
+app.get('/admin', isAuthenticated, async (req, res) => { 
     try {
-        // Ensure the logged-in user is an admin
-        if (req.session.user.user_group !== "Admin") {
-            return res.status(403).send("❌ Access Denied");
+        // Ensure the user is authenticated
+        if (!req.session.user) {
+            return res.redirect('/login'); // Redirect to login if no session
         }
 
-        // Fetch all users from MongoDB
-        const users = await User.find({}, "id username email");
+        const user = req.session.user;
 
-        // Render the admin dashboard
-        res.render('admin', { user: req.session.user, users });
+        // ✅ If user_group = "store", render store.ejs
+        if (user.user_group.toLowerCase() === "store") {
+            return res.render('store', { user }); 
+        }
+
+        // ✅ If user_group = "admin", render admin.ejs
+        if (user.user_group.toLowerCase() === "admin") {
+            const users = await User.find({}, "id username email");
+            return res.render('admin', { user, users });
+        }
+
+        // ❌ If user has an unknown role, deny access
+        return res.status(403).send("❌ Access Denied - Unknown Role");
 
     } catch (error) {
         console.error("❌ Database error:", error);
         res.status(500).send("❌ Database error! Try again.");
     }
 });
+
+
+// only for check by krishna on 22 march
+router.get('/store', async (req, res) => {
+    try {
+        const users = await User.find(); // Fetch users from database
+        res.render('store', { users }); // Pass users to EJS
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+// only for check by krishna on 22 march
+app.get('/store', isAuthenticated, async (req, res) => { 
+    try {
+        // Ensure the user is authenticated
+        if (!req.session.user) {
+            return res.redirect('/login'); // Redirect to login if no session
+        }
+
+        const user = req.session.user;
+
+        // ✅ If user_group = "store", render store.ejs
+        if (user.user_group.toLowerCase() === "store") {
+            return res.render('store', { user }); 
+        }
+
+        // ✅ If user_group = "admin", render admin.ejs
+        if (user.user_group.toLowerCase() === "admin") {
+            const users = await User.find({}, "id username email");
+            return res.render('admin', { user, users });
+        }
+
+        // ❌ If user has an unknown role, deny access
+        return res.status(403).send("❌ Access Denied - Unknown Role");
+
+    } catch (error) {
+        console.error("❌ Database error:", error);
+        res.status(500).send("❌ Database error! Try again.");
+    }
+});
+
+
 
 app.post('/login', async (req, res) => { 
     try {
