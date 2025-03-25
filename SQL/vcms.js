@@ -72,7 +72,7 @@ const vcBookingSchema = new mongoose.Schema({
 // const vcms = mongoose.model("vcms", userSchema); // ✅ Fixed: Defined before exporting
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 const Client = mongoose.models.Client || mongoose.model("Client", clientSchema);
-const Booking = mongoose.models.Booking || mongoose.model("Booking", bookingSchema);
+// const Booking = mongoose.models.Booking || mongoose.model("Booking", bookingSchema);
 const VCBooking = mongoose.models.VCBooking || mongoose.model("VCBooking", vcBookingSchema);
 
 
@@ -123,6 +123,6 @@ async function deleteUser(email) {
 
 
 // ✅ Export Models (Fixed)
-module.exports = { vcms, User, Client, Booking, VCBooking };
+module.exports = { vcms, User, Client, VCBooking };
 
 

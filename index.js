@@ -159,9 +159,10 @@ app.get('/admin-dashboard', (_, res) =>
   app.get('/store', (_, res) => 
     res.render('store'));
   // Default Route (Redirect to VNOC Dashboard)
-app.get("/vnoc", (req, res) => {
-    res.redirect("/vnoc");
+  app.get("/vnoc", (req, res) => {
+    res.render("vnoc", { title: "VNOC Dashboard" });
 });
+
 
 
 //routes
@@ -335,7 +336,7 @@ app.get('/store', (req, res) => {
 app.get('/vnoc', async (req, res) => { 
     try {
         // Fetch bookings from MongoDB
-        const bookings = await Booking.find(); // Get all bookings
+        const bookings = await VCBooking.find(); // Get all bookings
 
         console.log("Bookings fetched:", bookings); // Debugging log
 
@@ -738,39 +739,22 @@ router.post('/add_user', async (req, res) => {
 // write on 24 march by krishna
 
 // 🔹 Define VNOC Route Here
-app.get('/vnoc', isAuthenticated, async (req, res) => {
+app.get("/vnoc", async (req, res) => {
     try {
-        console.log("🔍 Checking Session User:", req.session.user); // Debugging log
+        // Fetch booking data from MongoDB
+        const pendingBookings = await VCBooking.countDocuments({ status: "pending" });
+        const approvedBookings = await VCBooking.countDocuments({ status: "approved" });
+        const rejectedBookings = await VCBooking.countDocuments({ status: "rejected" });
 
-        if (!req.session.user) {
-            console.log("❌ No user found in session. Redirecting to login.");
-            return res.redirect('/login'); 
-        }
-
-        const user = req.session.user;
-
-        if (user.user_group.toLowerCase() !== "vnoc") {
-            return res.status(403).send("❌ Access Denied - You are not authorized to view this page.");
-        }
-
-        // ✅ Fetch booking counts from MongoDB
-        const pendingBookings = await Booking.countDocuments({ status: "Pending" });
-        const approvedBookings = await Booking.countDocuments({ status: "Approved" });
-        const rejectedBookings = await Booking.countDocuments({ status: "Rejected" });
-
-        console.log("📊 Booking Counts:", { pendingBookings, approvedBookings, rejectedBookings });
-
-        // ✅ Pass booking data to vnoc.ejs
-        res.render('vnoc', { 
-            user,
+        // Render the VNOC page with the data
+        res.render("vnoc", {
             pendingBookings,
             approvedBookings,
             rejectedBookings
         });
-
     } catch (error) {
-        console.error("❌ Error fetching VNOC data:", error);
-        res.status(500).send("❌ Internal Server Error");
+        console.error("Error fetching bookings:", error);
+        res.status(500).send("Internal Server Error");
     }
 });
 
