@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCNow Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="/css/img/vcn.png" alt="VCNow Logo" class="logo">
+            <h1 class="title">Admin Dashboard</h1>
+        </header>
+
+        <nav class="menu">
+            <div class="dropdown">
+                <a href="#">Customer ▼</a>
+                <div class="dropdown-content">
+                    <a href="/customer/clients">Add Client</a>
+                    <a href="/customer/add_location">Add Location</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#">Manage User ▼</a>
+                <div class="dropdown-content">
+                    <a href="/manageuser/add_user">Add User</a>
+                    <a href="/manageuser/delete_user">Delete User</a> 
+                    <a href="/manageuser/reset_user">Reset User</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#">Reports ▼</a>
+                <div class="dropdown-content">
+                    <a href="/reports/clientreport">Client Reports</a>
+                    <a href="/reports/dailyreport">Daily Report</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#">Account ▼</a>
+                <div class="dropdown-content">
+                    <a href="/account/account">My Account</a>
+                </div>
+            </div>    
+
+            <div class="dropdown">
+                <a href="#">Users ▼</a>
+                <div class="dropdown-content">
+                    <a href="/manageuser/">View Users</a> <!-- Updated Link -->
+                    <a href="/users/assignuser">Assign User</a>
+                </div>
+            </div>
+            
+            <div class="user-info">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <span id="userEmail"><%= user.email %></span>
+                <% } else { %>
+                    <span id="userEmail">Guest</span>
+                <% } %>
+            </div>      
+                    
+            <a href="/login" class="signoff-btn">Sign Off</a>     
+        </nav>
+
+       <!-- Display Users from the Database -->
+       <!-- Display Users from the Database -->
+        <div class="content">
+            <h2>Registered Users</h2>
+            
+            <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Users</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(user => { %>
+                            <tr>
+                                <td rowspan="2"><%= user._id %></td>
+                                <td><strong>Username:</strong> <%= user.username %></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong> <%= user.email %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p class="no-users">No registered users found.</p>
+            <% } %>          
+        </div>
+
+
+
+        <footer class="footer">
+            <p>Powered by Your Company</p>
+            <p>Copyrights © 2014. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

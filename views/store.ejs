@@ -1,0 +1,167 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VC Booking</title>
+    <link rel="stylesheet" href="/css/store.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>Welcome, 
+            <% if (typeof user !== 'undefined' && user) { %>
+                <span class="user-name"><%= user.name || user.email %> (Corporate VC Coordinator)</span>
+            <% } else { %>
+                <span class="user-name">Guest</span>
+            <% } %>
+        </h1>
+    </div>
+
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="#">Transaction</a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">My Account</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Postpaid VC Booking</a>
+                <div class="dropdown-content">
+                    <a href="#">Booking New</a>
+                    <a href="#">Edit VC Booking</a>
+                    <a href="#">Reschedule VC Booking</a>
+                    <a href="#">Cancellation VC Booking</a>
+                </div>
+            </li>
+            <li><a href="#confirmVC">Confirmation</a></li>
+        </ul>
+    </nav>
+
+    <!-- BOOKING FORM -->
+    <div class="container">
+        <h2>VC BOOKING</h2>
+        <form action="/bookVC" method="post">
+            <label for="companyName">Name of Organisation:</label>
+<select name="companyName" required>
+    <option value="">Please Select</option>
+    <option value="Hindustan Unilever Ltd-W215">Hindustan Unilever Ltd-W215</option>
+    <option value="Tata Consultancy Services">Tata Consultancy Services</option>
+    <option value="Infosys Ltd">Infosys Ltd</option>
+    <option value="Wipro Technologies">Wipro Technologies</option>
+    <option value="Reliance Industries">Reliance Industries</option>
+    <option value="Adani Enterprises">Adani Enterprises</option>
+    <option value="Larsen & Toubro">Larsen & Toubro</option>
+    <option value="ICICI Bank">ICICI Bank</option>
+    <option value="HDFC Bank">HDFC Bank</option>
+    <option value="Bharti Airtel">Bharti Airtel</option>
+</select>
+
+        
+            <label for="chairperson">Name of Chairperson:</label>
+            <select name="chairperson" required>
+                <option value="">Please Select</option>
+                <option value="Chairperson A">Chairperson A</option>
+                <option value="Chairperson B">Chairperson B</option>
+            </select>
+        
+            <label for="designation">Designation:</label>
+            <select name="designation" required>
+                <option value="">Please Select</option>
+                <option value="Manager">Manager</option>
+                <option value="Director">Director</option>
+            </select>
+        
+            <label for="contactNumber">Contact Number:</label>
+            <input type="tel" name="contactNumber" value="<%= user.phone %>" readonly> 
+        
+            <label for="email">E-Mail ID:</label>
+            <input type="email" name="email" value="<%= user.email %>" readonly> 
+        
+            <label for="bookedBy">Booked By:</label>
+            <input type="radio" name="bookedBy" value="VC Now Center" required> VC Now Center
+            <input type="radio" name="bookedBy" value="Corporate" required> Corporate
+        
+            <label for="vcPurpose">VC Purpose:</label>
+            <select name="vcPurpose" required>
+                <option value="">Please Select</option>
+                <option value="Business Meeting">Business Meeting</option>
+                <option value="Training Session">Training Session</option>
+            </select>
+        
+            <label for="remark">Remark:</label>
+            <textarea name="remark"></textarea>
+        
+            <label for="vcDuration">VC Duration:</label>
+            <input type="number" name="vcDuration" min="0.5" step="0.5" required>
+        
+            <label>Start Date & Time:</label>
+            <input type="datetime-local" name="vcStartDate" required>
+        
+            <label>End Date & Time:</label>
+            <input type="datetime-local" name="vcEndDate" required>
+        
+            <button type="submit">Book VC Session</button>
+        </form>
+        
+    </div>
+
+    <!-- CONFIRMATION SECTION -->
+    <div class="container section" id="confirmVC">
+        <h2>Find/Confirm VC Session</h2>
+        <table>
+            <tr>
+                <th>Company</th>
+                <th>Chairperson</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+            </tr>
+            <% if (typeof vcSessions !== 'undefined' && vcSessions.length > 0) { %>
+                <% vcSessions.forEach(session => { %>
+                    <tr>
+                        <td><%= session.companyName %></td>
+                        <td><%= session.chairperson %></td>
+                        <td><%= new Date(session.vcStartDate).toLocaleString() %></td>
+                        <td><%= new Date(session.vcEndDate).toLocaleString() %></td>
+                        <td><%= session.status === "Approved" ? "✅ Approved" : session.status === "Rejected" ? "❌ Rejected" : "⏳ Pending" %></td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr><td colspan="5">No VC sessions found.</td></tr>
+            <% } %>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>Powered by VCNow &copy; 2025. All rights reserved.</p>
+    </div>
+    <script>
+        document.getElementById("bookingForm").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Prevent default form submission
+        
+            const formData = new FormData(this);
+        
+            try {
+                const response = await fetch("/bookVC", {
+                    method: "POST",
+                    body: new URLSearchParams(formData),
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                });
+        
+                const result = await response.text();
+                
+                if (response.ok) {
+                    alert("✅ VC Booking Successful!");
+                    this.reset(); // Clear form fields
+                } else {
+                    alert("❌ Error: " + result);
+                }
+            } catch (error) {
+                alert("❌ Booking Failed: " + error.message);
+            }
+        });
+        </script>
+</body>
+</html>

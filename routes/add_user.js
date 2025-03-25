@@ -31,18 +31,23 @@ router.post('/add_user', async (req, res) => {
 
         // Save user to database
         await newUser.save();
-        // res.status(201).json({ message: "✅ User created successfully!" });
+       //  res.status(201).json({ message: "✅ User created successfully!" });
 
           // ✅ Return success message with Login Button
           res.status(201).send(`
-            <div style="text-align: center; font-family: Arial, sans-serif;">
+            <div style="text-align: center; font-family: Arial, sans-serif; padding: 20px; border: 2px solid green; background-color: #e8f5e9; width: 50%; margin: 50px auto; border-radius: 10px;">
                 <h2 style="color: green;">✅ User created successfully!</h2>
                 <p>You can now log in using your credentials.</p>
-                <a href="/login" style="display: inline-block; padding: 10px 20px; margin-top: 10px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
-                    🔑 Login Now
-                </a>
+        
+                <!-- Button to go back to the previous page -->
+                <button onclick="window.history.back()" 
+                    style="padding: 10px 20px; margin-top: 10px; font-size: 16px; color: white; background-color: #007BFF; border: none; border-radius: 5px; cursor: pointer;">
+                    🔙 Go Back
+                </button>
             </div>
         `);
+        
+
 
     } catch (error) {
         console.error("❌ Error:", error);

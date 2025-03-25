@@ -4,9 +4,10 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin"); // Ensure this path is correct
 const User = require('../models/user'); // Import Mongoose User model
+// const { User } = require('../models');
 require("dotenv").config(); // Load environment variables
 
-// Admin Login Route
+// Admin Login Route chnge by krishna 21 march
 // 
 router.post("/admin/login", async (req, res) => {
     try {

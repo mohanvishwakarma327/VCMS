@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 
 // ✅ Users Schema
 const userSchema = new mongoose.Schema({
-    user_group: { type: String, enum: ['Admin', 'Manager', 'Staff'], required: true },
+    user_group: { type: String, enum: ['Admin', 'store', 'vnoc'], required: true },
     store: { type: String, required: true },
     username: { type: String, required: true },
     email: { type: String, unique: true, required: true },
@@ -28,22 +28,22 @@ const clientSchema = new mongoose.Schema({
 });
 
 // ✅ Bookings Schema
-const bookingSchema = new mongoose.Schema({
-    companyName: { type: String, required: true },
-    chairperson: { type: String, required: true },
-    contactNumber: { type: String, required: true },
-    email: { type: String, required: true },
-    vcPurpose: { type: String, required: true },
-    department: { type: String, required: true },
-    remark: { type: String },
-    vcDuration: { type: Number, required: true },
-    vcType: { type: String, enum: ['audio', 'video', 'hybrid'], required: true },
-    vcStartDate: { type: Date, required: true },
-    vcEndDate: { type: Date, required: true },
-    recording: { type: String, enum: ['yes', 'no'], required: true },
-    billingSection: { type: String, enum: ['prepaid', 'postpaid'], required: true },
-    created_at: { type: Date, default: Date.now }
-});
+// const bookingSchema = new mongoose.Schema({
+//     companyName: { type: String, required: true },
+//     chairperson: { type: String, required: true },
+//     contactNumber: { type: String, required: true },
+//     email: { type: String, required: true },
+//     vcPurpose: { type: String, required: true },
+//     department: { type: String, required: true },
+//     remark: { type: String },
+//     vcDuration: { type: Number, required: true },
+//     vcType: { type: String, enum: ['audio', 'video', 'hybrid'], required: true },
+//     vcStartDate: { type: Date, required: true },
+//     vcEndDate: { type: Date, required: true },
+//     recording: { type: String, enum: ['yes', 'no'], required: true },
+//     billingSection: { type: String, enum: ['prepaid', 'postpaid'], required: true },
+//     created_at: { type: Date, default: Date.now }
+// });
 
 // ✅ VC Bookings Schema
 const vcBookingSchema = new mongoose.Schema({
@@ -65,11 +65,16 @@ const vcBookingSchema = new mongoose.Schema({
 });
 
 // ✅ Create Models
-const User = mongoose.model("User", userSchema);
-const Client = mongoose.model("Client", clientSchema);
-const Booking = mongoose.model("Booking", bookingSchema);
-const VCBooking = mongoose.model("VCBooking", vcBookingSchema);
-const vcms = mongoose.model("vcms", userSchema); // ✅ Fixed: Defined before exporting
+// const User = mongoose.model("User", userSchema);
+// const Client = mongoose.model("Client", clientSchema);
+// const Booking = mongoose.model("Booking", bookingSchema);
+// const VCBooking = mongoose.model("VCBooking", vcBookingSchema);
+// const vcms = mongoose.model("vcms", userSchema); // ✅ Fixed: Defined before exporting
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+const Client = mongoose.models.Client || mongoose.model("Client", clientSchema);
+// const Booking = mongoose.models.Booking || mongoose.model("Booking", bookingSchema);
+const VCBooking = mongoose.models.VCBooking || mongoose.model("VCBooking", vcBookingSchema);
+
 
 // ✅ Insert Default Admin User if Not Exists
 (async () => {
@@ -99,7 +104,25 @@ const vcms = mongoose.model("vcms", userSchema); // ✅ Fixed: Defined before ex
     }
 })();
 
+
+// ✅ Delete  User if Exists   right on 20-03-2025
+async function deleteUser(email) {
+    try {
+        const deletedUser = await User.findOneAndDelete({ email: email });
+
+        if (deletedUser) {
+            console.log(`✅ User with email '${email}' deleted successfully.`);
+        } else {
+            console.log(`⚠️ User with email '${email}' not found.`);
+        }
+    } catch (error) {
+        console.error("❌ Error Deleting User:", error);
+    }
+}
+
+
+
 // ✅ Export Models (Fixed)
-module.exports = { vcms, User, Client, Booking, VCBooking };
+module.exports = { vcms, User, Client, VCBooking };
 
 

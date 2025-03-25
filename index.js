@@ -20,7 +20,9 @@ const User = require('./models/user'); // Import User model
 const dotenv = require("dotenv");
 const MongoStore = require('connect-mongo'); //Mohan
 const jwt = require('jsonwebtoken');
-const deleteUserRoute = require('./routes/deleteUser'); 
+// const deleteUserRoute = require('./routes/delete_user'); 
+const vnocRoutes = require("./routes/vnoc"); // Ensure the correct path
+
 
 
 const authenticateJWT = (req, res, next) => {
@@ -51,14 +53,11 @@ const vcms = mongoose.connection;
 
 module.exports = app;
 
-// module.exports = vcms; // Export connection
+//Routes Middleware
 
-//Routes
+// Routes
+app.use("/vnoc", vnocRoutes);
 app.use("/auth", require("./routes/auth")); // Ensure this path is correct
-
-
-// ✅ Middleware
-app.use(deleteUserRoute);
 app.use('/', authRoutes);
 app.use('/views/manageuser', userRoutes);
 // const userRoutes = require('./routes/userRoutes');
@@ -76,6 +75,7 @@ app.use(session({
     secret: 'your-secret-key',  // Change this to a strong secret
     resave: false,
     saveUninitialized: false,
+    cookie: { secure: false }, // Use true if using HTTPS
     store: MongoStore.create({
         mongoUrl: 'mongodb://localhost:27017/vcms',  // Change to your actual DB
         collectionName: 'sessions'
@@ -86,6 +86,11 @@ app.use(session({
         maxAge: 1000 * 60 * 60  // 1 hour session
     }
 }));
+
+// Import Routes change on 21 march by krishna 
+const deleteUserRoute = require("./routes/delete_user");
+app.use("/", deleteUserRoute); // w o 21-03-25
+app.use(deleteUserRoute);
 
 // ✅ Session Middleware
 app.use(session({
@@ -144,6 +149,21 @@ app.get('/forgot-password', (_, res) =>
 //User
 app.get('/users/assignuser', (_, res) => 
     res.render('users/assignuser'));
+//user-dashboard
+app.get('/user-dashboard', (_, res) => 
+    res.render('user-dashboard'));
+// admin-dashboard 22 march by krishna
+app.get('/admin-dashboard', (_, res) => 
+    res.render('admin-dashboard'));
+// write on 22 march by krishna
+  app.get('/store', (_, res) => 
+    res.render('store'));
+  // Default Route (Redirect to VNOC Dashboard)
+  app.get("/vnoc", (req, res) => {
+    res.render("vnoc", { title: "VNOC Dashboard" });
+});
+
+
 
 //routes
 app.use('/manageuser', addUserRoute);
@@ -157,37 +177,19 @@ function isAuthenticated(req, res, next) {
         return res.redirect('/login'); // 🔒 Redirect to login page if not logged in
     }
 }
+// 🚀 Login Route
+// app.post('/login', async (req, res) => {
+//     const { email, password } = req.body;
 
+//     const user = await User.findOne({ where: { email } });
 
+//     if (!user || !(await bcrypt.compare(password, user.password))) {
+//         return res.render('login', { error: 'Invalid credentials' });
+//     }
 
-//admin
-router.get('/admin', async (req, res) => {
-    try {
-        const users = await User.find(); // Fetch users from database
-        res.render('admin', { users }); // Pass users to EJS
-    } catch (error) {
-        console.error("Error fetching users:", error);
-        res.status(500).send("Internal Server Error");
-    }
-});
-app.get('/admin', isAuthenticated, async (req, res) => {
-    try {
-        // Ensure the logged-in user is an admin
-        if (req.session.user.user_group !== "Admin") {
-            return res.status(403).send("❌ Access Denied");
-        }
-
-        // Fetch all users from MongoDB
-        const users = await User.find({}, "id username email");
-
-        // Render the admin dashboard
-        res.render('admin', { user: req.session.user, users });
-
-    } catch (error) {
-        console.error("❌ Database error:", error);
-        res.status(500).send("❌ Database error! Try again.");
-    }
-});
+//     req.session.user = { email: user.email, id: user.id }; // ✅ Store user in session
+//     res.redirect('/bookerdashboard');
+// });
 
 app.post('/login', async (req, res) => { 
     try {
@@ -212,13 +214,272 @@ app.post('/login', async (req, res) => {
 
         // ✅ Set session & return success response
         req.session.user = user; 
-        res.status(200).json({ message: "✅ Login ok!" });
+        res.status(200).json({ message: "✅ Login successfull!" });
 
     } catch (error) {
         console.error("❌ Error during login:", error);
         res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
     }
 });
+
+// ✅ Admin Login Route (MongoDB + Mongoose)  change on 19-03-2025 by krish
+// app.post('/login', async (req, res) => {  
+//     try {
+//         const { email, password } = req.body;
+
+//         // 🛑 Validate Input
+//         if (!email || !password) {
+//             return res.status(400).json({ message: "❌ Email and password are required." });
+//         }
+
+//         // 🔍 Find admin user in MongoDB
+//         const user = await User.findOne({ email, user_group: 'Admin' });
+//         if (!user) {
+//             return res.status(401).json({ message: "❌ Invalid credentials or not an admin." });
+//         }
+
+//         // 🔑 Compare hashed passwords
+//         const isMatch = bcrypt.compareSync(password, user.password);
+//         if (!isMatch) {
+//             return res.status(401).json({ message: "❌ Invalid credentials." });
+//         }
+
+//         // ✅ Store Minimal User Data in Session
+//         req.session.user = {
+//             id: user._id,
+//             username: user.username,
+//             email: user.email,
+//             user_group: user.user_group
+//         };
+
+//         // res.redirect('/admin'); // Redirect to admin panel
+
+//         // write on 24 march by krishna
+//           // 🎯 Redirect based on user group
+//           if (user.user_group === 'Admin') {
+//             return res.redirect('/admin'); // Redirect to Admin Dashboard
+//         } else if (user.user_group === 'Store') {
+//             return res.redirect('/store'); // Redirect to Store Page
+//         } else if (user.user_group === 'vnoc') {
+//             return res.redirect('/vnoc-dashboard'); // write on 24-03 krishna 
+//         }
+//          else {
+//             return res.status(403).json({ message: "❌ Access Denied" });
+//         }
+
+//     } catch (error) {
+//         console.error("❌ Error during login:", error);
+//         res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
+//     }
+// });
+
+// ✅ Login Route write on 24-march krishna
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // 🛑 Validate Input
+        if (!email || !password) {
+            return res.status(400).json({ message: "❌ Email and password are required." });
+        }
+
+        // 🔍 Find user in MongoDB (Case-insensitive email)
+        const user = await User.findOne({ email: email.toLowerCase() });
+
+        if (!user) {
+            return res.status(401).json({ message: "❌ Invalid email or password." });
+        }
+
+        // 🔑 Compare hashed passwords (Async)
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: "❌ Invalid email or password." });
+        }
+
+        // ✅ Store Minimal User Data in Session
+        req.session.user = {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            user_group: user.user_group.toLowerCase() // Normalize case
+        };
+
+        // 🎯 Redirect based on user group
+        switch (req.session.user.user_group) {
+            case 'admin':
+                return res.redirect('/admin'); // Redirect to Admin Dashboard
+            case 'store':
+                return res.redirect('/store'); // Redirect to Store Page
+            case 'vnoc':
+                return res.redirect('/vnoc'); // Redirect to VNOC Dashboard
+            default:
+                return res.status(403).json({ message: "❌ Access Denied" });
+        }
+    } catch (error) {
+        console.error("❌ Error during login:", error);
+        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
+    }
+});
+
+// 🏠 Dashboard Route
+app.get('/store', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');  // Redirect if not logged in
+    }
+    
+    // Example VC sessions data (Replace with actual DB query)
+    const vcSessions = [];  // Example: await VCSessions.findAll()
+
+    res.render('store', { user: req.session.user, vcSessions });
+});
+// write on 24 marchh by krishna
+app.get('/vnoc', async (req, res) => { 
+    try {
+        // Fetch bookings from MongoDB
+        const bookings = await VCBooking.find(); // Get all bookings
+
+        console.log("Bookings fetched:", bookings); // Debugging log
+
+        res.render('vnoc', { bookings }); // Pass bookings to EJS template
+    } catch (error) {
+        console.error("Error fetching bookings:", error);
+        res.status(500).send("Error fetching bookings");
+    }
+});
+
+//admin
+router.get('/admin', async (req, res) => {
+    try {
+        const users = await User.find(); // Fetch users from database
+        res.render('admin', { users }); // Pass users to EJS
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// change by krishna on 24-03-2025
+// app.get('/admin', isAuthenticated, async (req, res) => { 
+//     try {
+//         // Ensure the user is authenticated
+//         if (!req.session.user) {
+//             return res.redirect('/login'); // Redirect to login if no session
+//         }
+
+//         const user = req.session.user;
+
+//         // ✅ If user_group = "store", render store.ejs
+//         if (user.user_group.toLowerCase() === "store") {
+//             // return res.render('store', { user }); 
+//             const users = await User.find({}, "id username email");
+//             return res.render('store', { user, users });
+//         }
+
+//         // ✅ If user_group = "admin", render admin.ejs
+//         if (user.user_group.toLowerCase() === "admin") {
+//             const users = await User.find({}, "id username email");
+//             return res.render('admin', { user, users });
+//         }
+
+//         // ❌ If user has an unknown role, deny access
+//         return res.status(403).send("❌ Access Denied - Unknown Role");
+
+//     } catch (error) {
+//         console.error("❌ Database error:", error);
+//         res.status(500).send("❌ Database error! Try again.");
+//     }
+// });
+
+// ✅ Updated on 24-03-2025 by Krishna
+app.get('/admin', isAuthenticated, async (req, res) => { 
+    try {
+        console.log("🔍 Checking Session User:", req.session.user); // Debugging log
+
+        // Ensure the user is authenticated
+        if (!req.session.user) {
+            console.log("❌ No user found in session. Redirecting to login.");
+            return res.redirect('/login'); // Redirect to login if no session
+        }
+
+        const user = req.session.user;
+
+        console.log("🎯 User Role:", user.user_group); // Log user role
+        console.log("🧐 Type of user_group:", typeof user.user_group); // Debugging type
+
+        // Ensure user_group is a valid string
+        if (!user.user_group || typeof user.user_group !== 'string') {
+            console.log("❌ Invalid or missing user_group.");
+            return res.status(403).send("❌ Access Denied - Invalid user role.");
+        }
+
+        // Convert user role to lowercase for case-insensitive matching
+        const role = user.user_group.toLowerCase();
+
+        // 🎯 Redirect based on user role
+        switch (role) {
+            case "admin":
+                const users = await User.find({}, "id username email"); // Fetch users for admin
+                return res.render('admin', { user, users }); // ✅ Render admin.ejs
+            case "store":
+                const storeUsers = await User.find({}, "id username email");
+                return res.render('store', { user, users: storeUsers }); // ✅ Render store.ejs
+            case "vnoc":
+                return res.render('vnoc', { user }); // ✅ Render vnoc.ejs
+            default:
+                console.log("⚠️ Unknown user role detected:", user.user_group);
+                return res.status(403).send(`❌ Access Denied - Unknown role: ${user.user_group}`);
+        }
+    } catch (error) {
+        console.error("❌ Database error:", error);
+        res.status(500).send("❌ Database error! Try again.");
+    }
+});
+
+
+
+// only for check by krishna on 22 march
+router.get('/store', async (req, res) => {
+    try {
+        const users = await User.find(); // Fetch users from database
+        res.render('store', { users }); // Pass users to EJS
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+// only for check by krishna on 22 march
+app.get('/store', isAuthenticated, async (req, res) => { 
+    try {
+        // Ensure the user is authenticated
+        if (!req.session.user) {
+            return res.redirect('/login'); // Redirect to login if no session
+        }
+
+        const user = req.session.user;
+
+        // ✅ If user_group = "store", render store.ejs
+        if (user.user_group.toLowerCase() === "store") {
+            return res.render('store', { user }); 
+        }
+
+        // ✅ If user_group = "admin", render admin.ejs
+        if (user.user_group.toLowerCase() === "admin") {
+            const users = await User.find({}, "id username email");
+            return res.render('admin', { user, users });
+        }
+
+        // ❌ If user has an unknown role, deny access
+        return res.status(403).send("❌ Access Denied - Unknown Role");
+
+    } catch (error) {
+        console.error("❌ Database error:", error);
+        res.status(500).send("❌ Database error! Try again.");
+    }
+});
+
+
+
+
 
 // Route to render assign user page
 app.get('/assignuser', (req, res) => {
@@ -253,44 +514,6 @@ const authenticateUser = (req, res, next) => {
 
 app.use('/admin', authenticateUser);
 
-// ✅ Admin Login Route (MongoDB + Mongoose)  change on 19-03-2025 by krish
-app.post('/login', async (req, res) => {  
-    try {
-        const { email, password } = req.body;
-
-        // 🛑 Validate Input
-        if (!email || !password) {
-            return res.status(400).json({ message: "❌ Email and password are required." });
-        }
-
-        // 🔍 Find admin user in MongoDB
-        const user = await User.findOne({ email, user_group: 'Admin' });
-        if (!user) {
-            return res.status(401).json({ message: "❌ Invalid credentials or not an admin." });
-        }
-
-        // 🔑 Compare hashed passwords
-        const isMatch = bcrypt.compareSync(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: "❌ Invalid credentials." });
-        }
-
-        // ✅ Store Minimal User Data in Session
-        req.session.user = {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            user_group: user.user_group
-        };
-
-        res.redirect('/admin'); // Redirect to admin panel
-
-    } catch (error) {
-        console.error("❌ Error during login:", error);
-        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
-    }
-});
-
 // // ✅ Admin Dashboard Route
 // app.get('/admin', (req, res) => {
 //     if (!req.session.user) {
@@ -313,54 +536,29 @@ app.post('/login', async (req, res) => {
 // ✅ Admin Dashboard Route (MongoDB + Mongoose)   change on 19-03-2025 by krish
 
 // delete user from database Ensure you have your DB connection set up BY Mohan
-router.delete('/delete-user', async (req, res) => {
+
+// ✅ DELETE user from MongoDB  change on 20-03-2025
+router.delete("/delete_user", async (req, res) => {   // deltet-user to delete_usero on 21 march
     try {
         const { userIdentifier } = req.body;
 
         if (!userIdentifier) {
-            return res.status(400).json({ message: "User ID or Email is required." });
+            return res.status(400).json({ message: "❌ User ID or Email is required!" });
         }
 
-        // Check if the user exists
-        const userCheckQuery = 'SELECT * FROM users WHERE id = ? OR email = ?';
-        const [user] = await db.execute(userCheckQuery, [userIdentifier, userIdentifier]);
+        // ✅ Find and delete user by ID or Email
+        const result = await User.deleteOne({
+            $or: [{ _id: userIdentifier }, { email: userIdentifier }]
+        });
 
-        if (user.length === 0) {
-            return res.status(404).json({ message: "User not found." });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: "❌ User not found!" });
         }
 
-        // Delete the user
-        const deleteQuery = 'DELETE FROM users WHERE id = ? OR email = ?';
-        await db.execute(deleteQuery, [userIdentifier, userIdentifier]);
-
-        res.status(200).json({ message: "User deleted successfully." });
+        res.status(200).json({ message: "✅ User deleted successfully!" });
     } catch (error) {
-        console.error("Error deleting user:", error);
-        res.status(500).json({ message: "Internal server error." });
-    }
-});
-
-app.get('/admin', async (req, res) => {
-    try {
-        // 🔑 Check if user is logged in
-        if (!req.session.user) {
-            return res.redirect('/login');
-        }
-
-        // 🔍 Verify if user is an Admin
-        if (req.session.user.user_group !== "Admin") {
-            return res.status(403).send("❌ Access Denied");
-        }
-
-        // 📌 Fetch all users (id, username, email) from MongoDB
-        const users = await User.find({}, "id username email");
-
-        // 🎨 Render admin dashboard with user data
-        res.render('admin', { user: req.session.user, users });
-
-    } catch (error) {
-        console.error("❌ Database error:", error);
-        res.status(500).send("❌ Database error! Try again.");
+        console.error("❌ Error deleting user:", error);
+        res.status(500).json({ message: "❌ Internal Server Error" });
     }
 });
 
@@ -446,47 +644,170 @@ app.get('/forget-password', (_, res) => res.render('forget-password'));
 // app.get('/manageuser/add_user', (_, res) => res.render('manageuser/add_user'));
 
 // 🔵 **Fix the User Creation Route**
-app.post("/manageuser/add_user", async (req, res) => {
-    try {
-        const { user_group, store, username, email, password, phone } = req.body;
+// app.post("/manageuser/add_user", async (req, res) => {
+//     try {
+//         const { user_group, store, username, email, password, phone } = req.body;
 
-        if (!user_group || !store || !username || !email || !password || !phone) {
-            return res.status(400).json({ message: "❌ All fields are required!" });
+//         if (!user_group || !store || !username || !email || !password || !phone) {
+//             return res.status(400).json({ message: "❌ All fields are required!" });
+//         }
+
+//         const hashedPassword = await bcrypt.hash(password, 10);
+
+//         const newUser = new User({
+//             user_group,
+//             store,
+//             username,
+//             email,
+//             password: hashedPassword,
+//             phone
+//         });
+
+//         await newUser.save();
+//         res.status(201).json({ message: "✅ User added successfully!" });
+
+//     } catch (error) {
+//         console.error("Error adding user:", error);
+//         res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
+//     }
+// });
+
+
+// router.post('/add_user', async (req, res) => {
+//     console.log("📥 Received data from frontend:", req.body);  // Debugging log
+
+//     try {
+//         const newUser = new User(req.body);
+//         await newUser.save();
+//         res.status(201).send("User created successfully!");
+//     } catch (error) {
+//         console.error("❌ Error:", error);
+//         res.status(400).send(error.message);
+//     }
+// });
+router.post('/add_user', async (req, res) => {
+    try {
+        const { user_group, store, username, email, phone, status, password, confirmPassword } = req.body;
+
+        // ✅ Check if passwords match
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: "❌ Passwords do not match. Please try again!" });
         }
 
+        // ✅ Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ message: "⚠️ User already exists." });
+        }
+
+        // ✅ Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // ✅ Create new user
         const newUser = new User({
             user_group,
             store,
             username,
             email,
+            phone,
+            status,
             password: hashedPassword,
-            phone
         });
 
+        // ✅ Save user to database
         await newUser.save();
-        res.status(201).json({ message: "✅ User added successfully!" });
 
-    } catch (error) {
-        console.error("Error adding user:", error);
-        res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
-    }
-});
+        // ✅ Return success message with Login Button
+        res.status(201).send(`
+            <div style="text-align: center; font-family: Arial, sans-serif;">
+                <h2 style="color: green;">✅ User created successfully!</h2>
+                <p>You can now log in using your credentials.</p>
+                <a href="/login" style="display: inline-block; padding: 10px 20px; margin-top: 10px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
+                    🔑 Login Now
+                </a>
+            </div>
+        `);
 
-
-router.post('/add_user', async (req, res) => {
-    console.log("📥 Received data from frontend:", req.body);  // Debugging log
-
-    try {
-        const newUser = new User(req.body);
-        await newUser.save();
-        res.status(201).send("User created successfully!");
     } catch (error) {
         console.error("❌ Error:", error);
-        res.status(400).send(error.message);
+        res.status(500).json({ message: "🚨 Internal Server Error. Please try again." });
     }
 });
+
+
+
+// write on 24 march by krishna
+
+// 🔹 Define VNOC Route Here
+app.get("/vnoc", async (req, res) => {
+    try {
+        // Fetch booking data from MongoDB
+        const pendingBookings = await VCBooking.countDocuments({ status: "pending" });
+        const approvedBookings = await VCBooking.countDocuments({ status: "approved" });
+        const rejectedBookings = await VCBooking.countDocuments({ status: "rejected" });
+
+        // Render the VNOC page with the data
+        res.render("vnoc", {
+            pendingBookings,
+            approvedBookings,
+            rejectedBookings
+        });
+    } catch (error) {
+        console.error("Error fetching bookings:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+
+// booking by krishna on 25 march 
+
+// Define Schema
+const vcBookingSchema = new mongoose.Schema({
+    companyName: String,
+    chairperson: String,
+    designation: String,
+    contactNumber: String,
+    email: String,
+    bookedBy: String,
+    vcPurpose: String,
+    remark: String,
+    vcDuration: Number,
+    vcStartDate: Date,
+    vcEndDate: Date,
+    status: { type: String, default: "Pending" }
+});
+
+
+// Prevent model re-compilation
+const VCBooking = mongoose.models.VCBooking || mongoose.model("VCBooking", vcBookingSchema);
+
+// Handle Form Submission
+app.post("/bookVC", async (req, res) => {
+    try {
+        const newBooking = new VCBooking({
+            companyName: req.body.companyName,
+            chairperson: req.body.chairperson,
+            designation: req.body.designation,
+            contactNumber: req.body.contactNumber,
+            email: req.body.email,
+            bookedBy: req.body.bookedBy,
+            vcPurpose: req.body.vcPurpose,
+            remark: req.body.remark,
+            vcDuration: req.body.vcDuration,
+            vcStartDate: req.body.vcStartDate,
+            vcEndDate: req.body.vcEndDate
+        });
+
+        await newBooking.save();
+        res.send("VC Booking Successful! <a href='/'>Go Back</a>");
+        
+    } catch (err) {
+        console.error(err);
+        res.send("Error saving data.");
+    }
+});
+
 
 // ✅ Logout Route
 app.get('/logout', (req, res) => {
@@ -494,6 +815,7 @@ app.get('/logout', (req, res) => {
         res.redirect('/login');
     });
 });
+
 
 // ✅ Start Server
 app.listen(PORT, () => {
