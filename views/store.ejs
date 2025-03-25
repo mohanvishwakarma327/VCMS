@@ -44,53 +44,67 @@
         <h2>VC BOOKING</h2>
         <form action="/bookVC" method="post">
             <label for="companyName">Name of Organisation:</label>
-            <input type="text" name="companyName" value="Hindustan Unilever Ltd-W215" readonly>
+<select name="companyName" required>
+    <option value="">Please Select</option>
+    <option value="Hindustan Unilever Ltd-W215">Hindustan Unilever Ltd-W215</option>
+    <option value="Tata Consultancy Services">Tata Consultancy Services</option>
+    <option value="Infosys Ltd">Infosys Ltd</option>
+    <option value="Wipro Technologies">Wipro Technologies</option>
+    <option value="Reliance Industries">Reliance Industries</option>
+    <option value="Adani Enterprises">Adani Enterprises</option>
+    <option value="Larsen & Toubro">Larsen & Toubro</option>
+    <option value="ICICI Bank">ICICI Bank</option>
+    <option value="HDFC Bank">HDFC Bank</option>
+    <option value="Bharti Airtel">Bharti Airtel</option>
+</select>
 
+        
             <label for="chairperson">Name of Chairperson:</label>
             <select name="chairperson" required>
                 <option value="">Please Select</option>
                 <option value="Chairperson A">Chairperson A</option>
                 <option value="Chairperson B">Chairperson B</option>
             </select>
-
+        
             <label for="designation">Designation:</label>
             <select name="designation" required>
                 <option value="">Please Select</option>
                 <option value="Manager">Manager</option>
                 <option value="Director">Director</option>
             </select>
-
+        
             <label for="contactNumber">Contact Number:</label>
-            <input type="tel" name="contactNumber" value="98114 7771" required>
-
+            <input type="tel" name="contactNumber" value="<%= user.phone %>" readonly> 
+        
             <label for="email">E-Mail ID:</label>
-            <input type="email" name="email" value="ravishankarW215@gm.com" required>
-
+            <input type="email" name="email" value="<%= user.email %>" readonly> 
+        
             <label for="bookedBy">Booked By:</label>
             <input type="radio" name="bookedBy" value="VC Now Center" required> VC Now Center
             <input type="radio" name="bookedBy" value="Corporate" required> Corporate
-
+        
             <label for="vcPurpose">VC Purpose:</label>
             <select name="vcPurpose" required>
                 <option value="">Please Select</option>
                 <option value="Business Meeting">Business Meeting</option>
                 <option value="Training Session">Training Session</option>
             </select>
-
+        
             <label for="remark">Remark:</label>
             <textarea name="remark"></textarea>
-
+        
             <label for="vcDuration">VC Duration:</label>
             <input type="number" name="vcDuration" min="0.5" step="0.5" required>
-
+        
             <label>Start Date & Time:</label>
             <input type="datetime-local" name="vcStartDate" required>
-
+        
             <label>End Date & Time:</label>
             <input type="datetime-local" name="vcEndDate" required>
-
+        
             <button type="submit">Book VC Session</button>
         </form>
+        
     </div>
 
     <!-- CONFIRMATION SECTION -->
@@ -123,6 +137,31 @@
     <div class="footer">
         <p>Powered by VCNow &copy; 2025. All rights reserved.</p>
     </div>
-
+    <script>
+        document.getElementById("bookingForm").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Prevent default form submission
+        
+            const formData = new FormData(this);
+        
+            try {
+                const response = await fetch("/bookVC", {
+                    method: "POST",
+                    body: new URLSearchParams(formData),
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                });
+        
+                const result = await response.text();
+                
+                if (response.ok) {
+                    alert("✅ VC Booking Successful!");
+                    this.reset(); // Clear form fields
+                } else {
+                    alert("❌ Error: " + result);
+                }
+            } catch (error) {
+                alert("❌ Booking Failed: " + error.message);
+            }
+        });
+        </script>
 </body>
 </html>

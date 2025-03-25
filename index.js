@@ -733,12 +733,6 @@ router.post('/add_user', async (req, res) => {
     }
 });
 
-// ✅ Logout Route
-app.get('/logout', (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/login');
-    });
-});
 
 
 // write on 24 march by krishna
@@ -779,6 +773,65 @@ app.get('/vnoc', isAuthenticated, async (req, res) => {
         res.status(500).send("❌ Internal Server Error");
     }
 });
+
+
+
+// booking by krishna on 25 march 
+
+// Define Schema
+const vcBookingSchema = new mongoose.Schema({
+    companyName: String,
+    chairperson: String,
+    designation: String,
+    contactNumber: String,
+    email: String,
+    bookedBy: String,
+    vcPurpose: String,
+    remark: String,
+    vcDuration: Number,
+    vcStartDate: Date,
+    vcEndDate: Date,
+    status: { type: String, default: "Pending" }
+});
+
+
+// Prevent model re-compilation
+const VCBooking = mongoose.models.VCBooking || mongoose.model("VCBooking", vcBookingSchema);
+
+// Handle Form Submission
+app.post("/bookVC", async (req, res) => {
+    try {
+        const newBooking = new VCBooking({
+            companyName: req.body.companyName,
+            chairperson: req.body.chairperson,
+            designation: req.body.designation,
+            contactNumber: req.body.contactNumber,
+            email: req.body.email,
+            bookedBy: req.body.bookedBy,
+            vcPurpose: req.body.vcPurpose,
+            remark: req.body.remark,
+            vcDuration: req.body.vcDuration,
+            vcStartDate: req.body.vcStartDate,
+            vcEndDate: req.body.vcEndDate
+        });
+
+        await newBooking.save();
+        res.send("VC Booking Successful! <a href='/'>Go Back</a>");
+        
+    } catch (err) {
+        console.error(err);
+        res.send("Error saving data.");
+    }
+});
+
+
+// ✅ Logout Route
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
+});
+
 
 // ✅ Start Server
 app.listen(PORT, () => {
