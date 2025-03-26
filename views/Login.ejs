@@ -51,7 +51,7 @@
     <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
-    <form id="loginForm">  <!-- ✅ Added id="loginForm" -->
+    <form id="loginForm" method="POST" action="/login">
         <h2>Login to VCNow</h2>
     
         <label for="email">Email:</label>
@@ -67,7 +67,7 @@
     </form>    
 </body>
 <!-- change on 22 march by krishna  -->
- <script>
+ <!-- <script>
 document.getElementById("loginForm").addEventListener("submit", async function(event) {
     event.preventDefault(); // Prevent default form submission
 
@@ -101,6 +101,51 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         alert("🚨 Something went wrong! Please try again.");
     }
 });
+</script> -->
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(result.message || "✅ Login successful!");
+
+            // ✅ Redirect based on user_group
+            switch (result.user_group) {
+                case "admin":
+                    window.location.href = "/admin";  // Redirect to Admin Dashboard
+                    break;
+                case "store":
+                    window.location.href = "/store";  // Redirect to Store Page
+                    break;
+                case "vnoc":
+                    window.location.href = "/vnoc";   // Redirect to VNOC Dashboard
+                    break;
+                default:
+                    alert("❌ Unauthorized access!");
+            }
+        } else {
+            alert(result.message || "❌ Login failed! Please check your credentials.");
+        }
+
+    } catch (error) {
+        console.error("❌ Error logging in:", error);
+        alert("🚨 Something went wrong! Please try again.");
+    }
+});
+
+
 </script>
 
 
