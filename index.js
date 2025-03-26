@@ -9,6 +9,7 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const authRoutes = require('./routes/auth');
+const dashboardRoutes = require('./routes/dashboard'); //vnoc 
 const mongoose = require("mongoose"); // ✅ Correct
 const manageUserRoutes = require("./routes/manageUser");
 // const MONGO_URI = process.env.MONGO_URI;
@@ -57,6 +58,7 @@ module.exports = app;
 //Routes Middleware
 
 // Routes
+app.use(dashboardRoutes);
 app.use("/vnoc", vnocRoutes);
 app.use("/auth", require("./routes/auth")); // Ensure this path is correct
 app.use('/', authRoutes);
@@ -171,11 +173,8 @@ app.get('/admin-dashboard', (_, res) =>
     res.render("vnoc", { title: "VNOC Dashboard" });
 });
 
-
-
 //routes
 app.use('/manageuser', addUserRoute);
-
 
 // Middleware to check if user is logged in
 function isAuthenticated(req, res, next) {
@@ -386,9 +385,6 @@ app.get('/store', (req, res) => {
     res.render('store', { user: req.session.user }); // Pass user data to store.ejs
 });
 
-
-
-
 // Route to render assign user page
 app.get('/assignuser', (req, res) => {
     const sql = "SELECT id, username, email FROM users";
@@ -577,10 +573,6 @@ router.post('/add_user', async (req, res) => {
     }
 });
 
-
-
-// write on 24 march by krishna
-
 // 🔹 Define VNOC Route Here
 app.get("/vnoc", async (req, res) => {
     try {
@@ -600,10 +592,6 @@ app.get("/vnoc", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
-
-
-
-// booking by krishna on 25 march 
 
 // Define Schema
 const vcBookingSchema = new mongoose.Schema({
