@@ -65,7 +65,8 @@
 
 const express = require('express');  
 const router = express.Router();
-const db = require("../config/db    "); // Ensure this points to your database configuration
+const db = require("../config/database"); // Ensure this points to your database configuration
+const Booking = require("../models/booking"); // Ensure this model exists
 
 // Middleware to check if user is logged in
 function isAuthenticated(req, res, next) {
@@ -120,14 +121,15 @@ router.post("/bookVC", async (req, res) => {
     }
 });
 // Route to render the booking list page
-router.get("/booking-list", isAuthenticated, async (req, res) => {
+router.get("/booking-list", async (req, res) => {
     try {
-        // Fetch all bookings from the database
-        const [bookings] = await db.execute("SELECT * FROM bookings");
-
-        res.render("booking-list", { bookings }); // Render EJS page with bookings data
+        console.log("📌 Fetching bookings...");
+        const bookings = await Booking.find(); // ✅ Correct MongoDB query
+        console.log("✅ Bookings fetched successfully:", bookings);
+        
+        res.render("booking-list", { bookings });
     } catch (error) {
-        console.error("Error fetching bookings:", error);
+        console.error("❌ Error fetching bookings:", error);
         res.status(500).send("Internal Server Error");
     }
 });
