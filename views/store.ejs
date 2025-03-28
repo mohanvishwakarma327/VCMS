@@ -113,57 +113,110 @@
     <div class="container section" id="confirmVC">
         <h2>Find/Confirm VC Session</h2>
         <table>
-            <tr>
-                <th>Company</th>
-                <th>Chairperson</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Status</th>
-            </tr>
-            <% if (typeof vcSessions !== 'undefined' && vcSessions.length > 0) { %>
-                <% vcSessions.forEach(session => { %>
-                    <tr>
-                        <td><%= session.companyName %></td>
-                        <td><%= session.chairperson %></td>
-                        <td><%= new Date(session.vcStartDate).toLocaleString() %></td>
-                        <td><%= new Date(session.vcEndDate).toLocaleString() %></td>
-                        <td><%= session.status === "Approved" ? "✅ Approved" : session.status === "Rejected" ? "❌ Rejected" : "⏳ Pending" %></td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
-                <tr><td colspan="5">No VC sessions found.</td></tr>
-            <% } %>
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Chairperson</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Status</th>
+                    <th>Join Link</th>
+                </tr>
+            </thead>
+            <tbody id="vcBookingsBody">
+                <tr><td colspan="6">No VC sessions found...</td></tr>
+            </tbody>
         </table>
     </div>
+    
 
     <div class="footer">
         <p>Powered by VCNow &copy; 2025. All rights reserved.</p>
     </div>
-    <script>
-        document.getElementById("bookingForm").addEventListener("submit", async function(event) {
-            event.preventDefault(); // Prevent default form submission
-        
-            const formData = new FormData(this);
-        
+    <!-- <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+        async function fetchBookings() {
             try {
-                const response = await fetch("/bookVC", {
-                    method: "POST",
-                    body: new URLSearchParams(formData),
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
-                });
-        
-                const result = await response.text();
-                
-                if (response.ok) {
-                    alert("✅ VC Booking Successful!");
-                    this.reset(); // Clear form fields
-                } else {
-                    alert("❌ Error: " + result);
+                const response = await fetch("/get-bookings"); // Fetch only logged-in user's bookings
+                if (!response.ok) throw new Error("Network response was not ok");
+
+                const bookings = await response.json();
+                const tableBody = document.getElementById("vcBookingsBody");
+                tableBody.innerHTML = ""; // Clear previous data
+
+                if (bookings.length === 0) {
+                    tableBody.innerHTML = "<tr><td colspan='6'>No VC sessions found.</td></tr>";
+                    return;
                 }
+
+                bookings.forEach((session) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${session.companyName}</td>
+                        <td>${session.chairperson}</td>
+                        <td>${new Date(session.vcStartDate).toLocaleString()}</td>
+                        <td>${new Date(session.vcEndDate).toLocaleString()}</td>
+                        <td>${session.status === "approved" ? "✅ Approved" : session.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}</td>
+                        <td>${session.joinLink ? `<a href="${session.joinLink}" target="_blank">Join VC</a>` : "N/A"}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
             } catch (error) {
-                alert("❌ Booking Failed: " + error.message);
+                console.error("❌ Error fetching bookings:", error);
+                document.getElementById("vcBookingsBody").innerHTML = "<tr><td colspan='6'>Failed to load data.</td></tr>";
             }
-        });
-        </script>
+        }
+
+        fetchBookings();
+        setInterval(fetchBookings, 60000); // Refresh every 1 min
+    });
+</script> -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", async function () {
+        async function fetchBookings() {
+            try {
+                console.log("Fetching bookings..."); // Debugging log
+
+                const response = await fetch("/get-bookings", { credentials: "include" }); // Include session cookies
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const bookings = await response.json();
+                console.log("Bookings received:", bookings); // Debugging log
+
+                const tableBody = document.getElementById("vcBookingsBody");
+                tableBody.innerHTML = ""; // Clear previous data
+
+                if (!bookings.length) {
+                    tableBody.innerHTML = "<tr><td colspan='6'>No VC sessions found.</td></tr>";
+                    return;
+                }
+
+                bookings.forEach(session => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${session.companyName}</td>
+                        <td>${session.chairperson}</td>
+                        <td>${new Date(session.vcStartDate).toLocaleString()}</td>
+                        <td>${new Date(session.vcEndDate).toLocaleString()}</td>
+                        <td>${session.status === "approved" ? "✅ Approved" : session.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}</td>
+                        <td>${session.joinLink ? `<a href="${session.joinLink}" target="_blank">Join VC</a>` : "N/A"}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error("❌ Error fetching bookings:", error);
+                document.getElementById("vcBookingsBody").innerHTML = "<tr><td colspan='6'>Failed to load data.</td></tr>";
+            }
+        }
+
+        fetchBookings();
+        setInterval(fetchBookings, 60000); // Refresh every 1 min
+    });
+</script>
+
+
+        
 </body>
 </html>

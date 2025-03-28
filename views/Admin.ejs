@@ -64,33 +64,119 @@
 
        <!-- Display Users from the Database -->
        <!-- Display Users from the Database -->
-        <div class="content">
-            <h2>Registered Users</h2>
-            
-            <% if (typeof users !== 'undefined' && users.length > 0) { %>
-                <table class="user-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Users</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% users.forEach(user => { %>
+       <div class="content"> <br>
+        <h2>Registered Users</h2>
+    
+        <!-- Search Bar -->
+        <input type="text" id="searchInput" placeholder="🔍 Search users..." onkeyup="searchUsers()">
+    
+        <!-- User Table Inside a Card -->
+        <div class="card">
+            <div class="table-container">
+                <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                    <table class="user-table" id="userTable">
+                        <thead>
                             <tr>
-                                <td rowspan="2"><%= user._id %></td>
-                                <td><strong>Username:</strong> <%= user.username %></td>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Actions</th>
                             </tr>
-                            <tr>
-                                <td><strong>Email:</strong> <%= user.email %></td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            <% } else { %>
-                <p class="no-users">No registered users found.</p>
-            <% } %>          
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user => { %>
+                                <tr>
+                                    <td><%= user._id %></td>
+                                    <td><%= user.username %></td>
+                                    <td><%= user.email %></td>
+                                    <td>
+                                        <button class="delete-btn" onclick="confirmDelete('<%= user._id %>')">🗑️ Delete</button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p class="no-users">No registered users found.</p>
+                <% } %>
+            </div>
         </div>
+    
+        <!-- Pagination Controls -->
+        <div id="pagination">
+            <button id="prevPage" onclick="changePage(-1)">⏪ Previous</button>
+            <span id="pageNumber">Page 1</span>
+            <button id="nextPage" onclick="changePage(1)">Next ⏩</button>
+        </div>
+    </div>
+    
+    <!-- JavaScript for Pagination, Search, and Delete -->
+    <script>
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let users = Array.from(document.querySelectorAll("#userTable tbody tr"));
+    
+        function showPage(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            users.forEach((row, index) => {
+                row.style.display = (index >= start && index < end) ? "table-row" : "none";
+            });
+            document.getElementById("pageNumber").innerText = `Page ${page}`;
+            document.getElementById("prevPage").disabled = page === 1;
+            document.getElementById("nextPage").disabled = end >= users.length;
+        }
+    
+        function changePage(direction) {
+            currentPage += direction;
+            showPage(currentPage);
+        }
+    
+        function searchUsers() {
+            const searchValue = document.getElementById("searchInput").value.toLowerCase();
+            users = Array.from(document.querySelectorAll("#userTable tbody tr"));
+            users.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(searchValue) ? "table-row" : "none";
+            });
+        }
+    
+        function confirmDelete(userId) {
+            if (confirm("Are you sure you want to delete this user?")) {
+                fetch(`/delete-user/${userId}`, { method: 'DELETE' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("User deleted successfully.");
+                            location.reload();
+                        } else {
+                            alert("Error deleting user.");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            }
+        }
+    
+        showPage(1);
+    </script>
+    
+    <!-- CSS for Styling -->
+    <style>
+        .content { max-width: 900px; margin: auto; text-align: center; font-family: Arial, sans-serif; }
+        .card { background: #f9f9f9; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 10px; margin-top: 10px; }
+        .table-container { max-height: 400px; overflow-y: auto; border-radius: 10px; }
+        .user-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 10px; overflow: hidden; }
+        .user-table th, .user-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .user-table th { background: #007bff; color: white; }
+        .user-table tr:nth-child(even) { background: #f2f2f2; }
+        .user-table tr:hover { background: #ddd; }
+        .delete-btn { background-color: red; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; }
+        .delete-btn:hover { background-color: darkred; }
+        .no-users { color: red; font-weight: bold; }
+        #pagination { margin-top: 10px; }
+        #pagination button { padding: 5px 10px; margin: 0 5px; cursor: pointer; }
+        #searchInput { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    </style>
 
 
 
