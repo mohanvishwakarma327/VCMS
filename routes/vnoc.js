@@ -84,26 +84,42 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/booking");
 
-// VNOC Dashboard - View Pending Bookings
 router.get("/vnoc", async (req, res) => {
     try {
         const allBookings = await Booking.find(); // Fetch all bookings from MongoDB
+
+        // ✅ Debugging: Check if data is being fetched
+        console.log("🔍 All Bookings:", allBookings);
+
         const pendingBookings = allBookings.filter(b => b.status.toLowerCase() === "pending").length;
         const approvedBookings = allBookings.filter(b => b.status.toLowerCase() === "approved").length;
         const rejectedBookings = allBookings.filter(b => b.status.toLowerCase() === "rejected").length;
-    
+
+        // ✅ Reports array for reports table
+        const reports = allBookings.map(booking => ({
+            id: booking._id, 
+            type: "VC Booking",
+            date: new Date(booking.createdAt).toLocaleDateString(),
+            status: booking.status
+        }));
+
+        // ✅ Ensure bookings is passed
         res.render("vnoc", { 
             pendingBookings, 
             approvedBookings, 
             rejectedBookings, 
-            latestBookings: allBookings
+            latestBookings: allBookings, 
+            reports, 
+            bookings: allBookings,  // ✅ Fixing `bookings` issue
+            vcSessions: [],         // ✅ Ensure VC Sessions exist
+            cancelRequests: []      // ✅ Ensure Cancel Requests exist
         });
+
     } catch (error) {
-        console.error("Error fetching bookings:", error);
+        console.error("❌ Error fetching bookings:", error);
         res.status(500).send("Error loading dashboard");
     }
 });
-
 // Approve Booking & Enter Zoom Link    by krishna on 25 march
 router.post("/approve/:id", async (req, res) => {
     try {

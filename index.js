@@ -24,6 +24,11 @@ const jwt = require('jsonwebtoken');
 // const deleteUserRoute = require('./routes/delete_user'); 
 const storeRoutes = require('./routes/store'); // Import store routes write on 26 march by krishna
 const vnocRoutes = require('./routes/vnoc'); // Import store routes write on 26 march by krishna
+const vcReportRoutes = require("./routes/vc-reports"); // Import VC Report Route write on 26 march by krishna
+const BookingModel = require('./models/booking'); // Ensure correct path write on 27 march by krishna
+const VCBookingModel = require('./models/vcBooking');  // Adjust path as needed
+
+
 
 
 
@@ -93,6 +98,7 @@ app.use(session({
  app.use(vnocRoutes);
  // Serve static files (CSS, JS)
 app.use(express.static('public'));   //write on 26 march by krishna
+app.use(vcReportRoutes); // Use the VC Report route write on 26 march by krishna
 
 
 
@@ -166,12 +172,54 @@ app.get('/user-dashboard', (_, res) =>
 app.get('/admin-dashboard', (_, res) => 
     res.render('admin-dashboard'));
 // write on 22 march by krishna
-  app.get('/store', (_, res) => 
-    res.render('store'));
+app.get("/store", async (req, res) => {
+    res.render("store"); // Ensure store.ejs can fetch data
+});
+
   // Default Route (Redirect to VNOC Dashboard)
   app.get("/vnoc", (req, res) => {
     res.render("vnoc", { title: "VNOC Dashboard" });
 });
+// API Route to Fetch VC Sessions  write on 26 march by krishna
+app.get("/get-bookings", async (req, res) => {
+    try {
+        const bookings = await VCBooking.find(); // Fetch all bookings
+        res.json(bookings);
+    } catch (error) {
+        console.error("Error fetching bookings:", error);
+        res.status(500).json({ error: "Failed to fetch bookings" });
+    }
+});
+// app.get("/get-bookings", async (req, res) => {
+//     try {
+//         if (!req.session.user) {
+//             return res.status(401).json({ message: "❌ User not logged in" });
+//         }
+
+//         const email = req.session.user.email;  
+//         console.log("📩 Fetching VC sessions for:", email);
+
+//         // 🔍 Query from `vcbookings` instead of `bookings`
+//         const bookings = await VCBookingModel.find({
+//             email: { $regex: new RegExp(`^${email}$`, "i") }  // Case-insensitive search
+//         });
+
+//         console.log("📋 VC Sessions Found:", bookings);
+
+//         if (bookings.length === 0) {
+//             return res.status(404).json({ message: "❌ No VC sessions found." });
+//         }
+
+//         res.json(bookings);
+//     } catch (error) {
+//         console.error("❌ Error fetching bookings:", error);
+//         res.status(500).json({ message: "❌ Internal Server Error" });
+//     }
+// });
+
+
+
+
 
 //routes
 app.use('/manageuser', addUserRoute);

@@ -1,123 +1,146 @@
-
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VNOC Booking Dashboard</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-        
-        /* Header */
-        .header { background: #333; color: white; padding: 15px 20px; text-align: center; font-size: 24px; }
-        
-        /* Navigation */
-        .nav { display: flex; justify-content: space-around; background: #444; padding: 10px; }
-        .nav a { color: white; text-decoration: none; padding: 10px 20px; }
-        .nav a:hover { background: #007bff; border-radius: 5px; }
-        
-        /* Summary Stats */
-        .stats { display: flex; justify-content: space-around; margin: 20px 0; }
-        .stat-box { background: #007bff; color: white; padding: 20px; border-radius: 10px; text-align: center; flex: 1; margin: 0 10px; font-size: 18px; }
-        .stat-box.approved { background: green; }
-        .stat-box.rejected { background: red; }
-        
-        /* Table */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-        th { background-color: #333; color: white; }
-        tr:hover { background: #f1f1f1; }
-        
-        /* Buttons */
-        button { padding: 8px 15px; cursor: pointer; margin: 5px; border: none; color: white; transition: 0.3s; }
-        .approve { background-color: green; }
-        .approve:hover { background-color: darkgreen; }
-        .reject { background-color: red; }
-        .reject:hover { background-color: darkred; }
-        
-        /* Footer */
-        .footer { background: #333; color: white; text-align: center; padding: 15px; margin-top: 20px; }
-    </style>
+    <title>VNOC Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
 </head>
-<body>
-    <div class="header">VNOC Booking Dashboard</div>
-    <div class="nav">
-        <a href="/vnoc/dashboard">Dashboard</a>
-        <a href="/vnoc/approved">Approved</a>
-        <a href="/vnoc/rejected">Rejected</a>
-        <a href="/logout">Logout</a>
-    </div>
-    
-    <div class="container">
-        <!-- Summary Cards -->
-        <div class="stats">
-            <div class="stat-box">Pending: <strong><%= pendingBookings %></strong></div>
-            <div class="stat-box approved">Approved: <strong><%= approvedBookings %></strong></div>
-            <div class="stat-box rejected">Rejected: <strong><%= rejectedBookings %></strong></div>
+<body class="bg-light">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">VNOC Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#reports">📊 Reports</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#booking-list">📅 Booking List</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#vc-track">🎥 VC Track</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#cancel-requests">❌ Cancel Requests</a></li>
+                    <li class="nav-item"><a class="nav-link text-danger fw-bold" href="/logout">🚪 Logout</a></li>
+                </ul>
+            </div>
         </div>
-        
-        <!-- Bookings Table -->
-        <table>
-            <tr>
-                <th>Company</th>
-                <th>Chairperson</th>
-                <th>Contact</th>
-                <th>Email</th>
-                <th>Purpose</th>
-                <th>VC Type</th>
-                <th>Duration</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Action</th>
-            </tr>
-            <% latestBookings.forEach(booking => { %>
-            <tr>
-                <td><%= booking.company_name %></td>
-                <td><%= booking.chairperson %></td>
-                <td><%= booking.contact_number %></td>
-                <td><%= booking.email %></td>
-                <td><%= booking.vc_purpose %></td>
-                <td><%= booking.vc_type %></td>
-                <td><%= booking.vc_duration %> hrs</td>
-                <td><%= new Date(booking.vc_start_date).toLocaleString() %></td>
-                <td><%= new Date(booking.vc_end_date).toLocaleString() %></td>
-                <td>
-                    <% if (booking.status === "Pending") { %>
-                        <button class="approve" onclick="updateBooking('<%= booking._id %>', 'approved')">Approve</button>
-                        <button class="reject" onclick="updateBooking('<%= booking._id %>', 'rejected')">Reject</button>
-                    <% } else { %>
-                        <strong><%= booking.status %></strong>
-                    <% } %>
-                </td>
-            </tr>
-            <% }) %>
-        </table>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-primary text-white text-center py-4">
+        <h1>Welcome to VNOC Dashboard</h1>
+        <p>Manage your video conferences, reports, and bookings efficiently.</p>
+    </header>
+
+    <!-- Dashboard Sections -->
+    <div class="container my-5">
+        <div class="row g-4">
+
+            <!-- Reports Section -->
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5>📊 Reports</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead><tr><th>ID</th><th>Report Type</th><th>Date</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <% reports.forEach(report => { %>
+                                    <tr>
+                                        <td><%= report.id %></td>
+                                        <td><%= report.type %></td>
+                                        <td><%= report.date %></td>
+                                        <td><span class="badge bg-success"><%= report.status %></span></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking List -->
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-warning text-dark">
+                        <h5>📅 Booking List</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead><tr><th>Booking ID</th><th>User</th><th>Date</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <% bookings.forEach(booking => { %>
+                                    <tr>
+                                        <td><%= booking.id %></td>
+                                        <td><%= booking.user %></td>
+                                        <td><%= booking.date %></td>
+                                        <td><span class="badge bg-info"><%= booking.status %></span></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VC Track Section -->
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5>🎥 VC Track</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead><tr><th>VC ID</th><th>Host</th><th>Start Time</th><th>Zoom Link</th></tr></thead>
+                            <tbody>
+                                <% vcSessions.forEach(vc => { %>
+                                    <tr>
+                                        <td><%= vc.id %></td>
+                                        <td><%= vc.host %></td>
+                                        <td><%= vc.startTime %></td>
+                                        <td><a href="<%= vc.link %>" target="_blank" class="btn btn-primary btn-sm">Join</a></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cancel Request Section -->
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-danger text-white">
+                        <h5>❌ Cancel Requests</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-danger">
+                            <thead><tr><th>Request ID</th><th>User</th><th>Reason</th><th>Action</th></tr></thead>
+                            <tbody>
+                                <% cancelRequests.forEach(request => { %>
+                                    <tr>
+                                        <td><%= request.id %></td>
+                                        <td><%= request.user %></td>
+                                        <td><%= request.reason %></td>
+                                        <td><button class="btn btn-danger btn-sm">Approve</button></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
-    
+
     <!-- Footer -->
-    <div class="footer">
-        &copy; 2025 VNOC Booking System | <a href="/contact" style="color: lightblue; text-decoration: none;">Contact Us</a>
-    </div>
-    
-    <script>
-    function updateBooking(bookingId, status) {
-        fetch('/vnoc/booking/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bookingId, status })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(`Booking ${status} successfully!`);
-                location.reload();
-            } else {
-                alert("Error updating booking");
-            }
-        })
-        .catch(error => console.error("Error:", error));
-    }
-    </script>
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© <%= new Date().getFullYear() %> VNOC. All rights reserved.</p>
+    </footer>
+
 </body>
 </html>
