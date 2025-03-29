@@ -34,108 +34,222 @@
         <p>Manage your video conferences, reports, and bookings efficiently.</p>
     </header>
 
-    <!-- Dashboard Sections -->
-    <div class="container my-5">
-        <div class="row g-4">
+   <!-- Dashboard Sections -->
+<div class="container my-5">
+    <div class="row g-4">
 
-            <!-- Reports Section -->
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h5>📊 Reports</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-striped">
-                            <thead><tr><th>ID</th><th>Report Type</th><th>Date</th><th>Status</th></tr></thead>
-                            <tbody>
-                                <% reports.forEach(report => { %>
-                                    <tr>
-                                        <td><%= report.id %></td>
-                                        <td><%= report.type %></td>
-                                        <td><%= report.date %></td>
-                                        <td><span class="badge bg-success"><%= report.status %></span></td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+      <!-- Dashboard Sections -->
+<div class="container my-5">
+    <div class="row g-4">
 
-            <!-- Booking List -->
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-header bg-warning text-dark">
-                        <h5>📅 Booking List</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-bordered">
-                            <thead><tr><th>Booking ID</th><th>User</th><th>Date</th><th>Status</th></tr></thead>
-                            <tbody>
-                                <% bookings.forEach(booking => { %>
-                                    <tr>
-                                        <td><%= booking.id %></td>
-                                        <td><%= booking.user %></td>
-                                        <td><%= booking.date %></td>
-                                        <td><span class="badge bg-info"><%= booking.status %></span></td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VC Track Section -->
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-header bg-success text-white">
-                        <h5>🎥 VC Track</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-hover">
-                            <thead><tr><th>VC ID</th><th>Host</th><th>Start Time</th><th>Zoom Link</th></tr></thead>
-                            <tbody>
-                                <% vcSessions.forEach(vc => { %>
-                                    <tr>
-                                        <td><%= vc.id %></td>
-                                        <td><%= vc.host %></td>
-                                        <td><%= vc.startTime %></td>
-                                        <td><a href="<%= vc.link %>" target="_blank" class="btn btn-primary btn-sm">Join</a></td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cancel Request Section -->
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-header bg-danger text-white">
-                        <h5>❌ Cancel Requests</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-danger">
-                            <thead><tr><th>Request ID</th><th>User</th><th>Reason</th><th>Action</th></tr></thead>
-                            <tbody>
-                                <% cancelRequests.forEach(request => { %>
-                                    <tr>
-                                        <td><%= request.id %></td>
-                                        <td><%= request.user %></td>
-                                        <td><%= request.reason %></td>
-                                        <td><button class="btn btn-danger btn-sm">Approve</button></td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
+        <!-- Booking List -->
+      <!-- Booking List -->
+<div class="col-12">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h5>📅 Booking List</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>User</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th> <!-- New column for the button -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <% bookings.forEach(booking => { %>
+                        <tr>
+                            <td><%= booking.id %></td>
+                            <td><%= booking.user %></td>
+                            <td><%= booking.date %></td>
+                            <td><span class="badge bg-info"><%= booking.status %></span></td>
+                            <td>
+                                <a href="/booking/details/<%= booking.id %>" class="btn btn-primary btn-sm">
+                                    View Details
+                                </a>
+                            </td> <!-- Link added -->
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
+
+
+ <!-- VC Track Section -->
+<div class="col-12">
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h5>🎥 VC Track</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>VC ID</th>
+                        <th>Host</th>
+                        <th>Start Time</th>
+                        <th>Zoom Link</th>
+                        <th>Action</th> <!-- New column for Save button -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <% vcSessions.forEach(vc => { %>
+                        <tr>
+                            <td><%= vc.id %></td>
+                            <td><%= vc.host %></td>
+                            <td><%= vc.startTime %></td>
+                            <td><a href="<%= vc.link %>" target="_blank" class="btn btn-primary btn-sm">Join</a></td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="saveVC('<%= vc.id %>')">Save</button>
+                            </td> <!-- Save button added -->
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function saveVC(vcId) {
+        // Example: Send a POST request to save the VC session
+        fetch('/vc/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: vcId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('VC session saved successfully!');
+            } else {
+                alert('Error saving VC session.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
+
+      <!-- Reports Section -->
+<div class="col-12">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5>📊 Reports</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Report Type</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th> <!-- New column for Save button -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <% reports.forEach(report => { %>
+                        <tr>
+                            <td><%= report.id %></td>
+                            <td><%= report.type %></td>
+                            <td><%= report.date %></td>
+                            <td><span class="badge bg-success"><%= report.status %></span></td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="saveReport('<%= report.id %>')">Save</button>
+                            </td> <!-- Save button added -->
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function saveReport(reportId) {
+        // Example: Send a POST request to save the report
+        fetch('/reports/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: reportId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Report saved successfully!');
+            } else {
+                alert('Error saving report.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
+
+      <!-- Cancel Request Section -->
+<div class="col-12">
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+            <h5>❌ Cancel Requests</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-danger">
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>User</th>
+                        <th>Reason</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% cancelRequests.forEach(request => { %>
+                        <tr id="request-<%= request.id %>">
+                            <td><%= request.id %></td>
+                            <td><%= request.user %></td>
+                            <td><%= request.reason %></td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="approveRequest('<%= request.id %>')">
+                                    Approve
+                                </button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function approveRequest(requestId) {
+        if (confirm("Are you sure you want to approve this request?")) {
+            fetch('/cancel-requests/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: requestId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Request approved successfully!');
+                    document.getElementById(`request-${requestId}`).remove(); // Remove row from table
+                } else {
+                    alert('Error approving request.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+</script>
+
 
     <!-- Footer -->
     <footer class="bg-dark text-white text-center py-3">
