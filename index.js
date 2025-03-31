@@ -32,6 +32,7 @@ const VCBookingModel = require('./models/vcBooking');  // Adjust path as needed
 
 
 
+
 const authenticateJWT = (req, res, next) => {
     const token = req.cookies.token; // Assuming token is stored in cookies
     if (!token) return res.redirect('/login');
@@ -99,6 +100,7 @@ app.use(session({
  // Serve static files (CSS, JS)
 app.use(express.static('public'));   //write on 26 march by krishna
 app.use(vcReportRoutes); // Use the VC Report route write on 26 march by krishna
+app.use("/", storeRoutes); // Use the store route write on 31 march by krishna
 
 
 
@@ -121,6 +123,8 @@ app.post('/forgot-password', (req, res) => {
 });
 
 // ✅ LOGIN SYSTEM
+app.get('/', (_, res) => 
+    res.render('login'));
 app.get('/login', (_, res) => 
     res.render('login'));
 //confirm page
@@ -691,6 +695,22 @@ app.post("/bookVC", async (req, res) => {
     } catch (err) {
         console.error(err);
         res.send("Error saving data.");
+    }
+});
+
+
+// vnoc dashboard for booking show by krishna on 31 march 
+router.post("/approve-booking/:id", async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        const updatedBooking = await Booking.findByIdAndUpdate(bookingId, { status: "Approved" }, { new: true });
+
+        if (!updatedBooking) {
+            return res.status(404).json({ error: "Booking not found" });
+        }
+        res.json({ success: true, message: "Booking approved", booking: updatedBooking });
+    } catch (error) {
+        res.status(500).json({ error: "Error approving booking" });
     }
 });
 

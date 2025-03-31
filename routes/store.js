@@ -1,70 +1,6 @@
-// const express = require('express'); 
-// const router = express.Router();
-
-// // Middleware to check if user is logged in
-// function isAuthenticated(req, res, next) {
-//     if (req.session && req.session.user) {
-//         return next(); // Proceed if authenticated
-//     }
-//     res.redirect("/login"); // Redirect to login if not authenticated
-// }
-
-// // Route to handle different user roles
-// router.get('/store', isAuthenticated, (req, res) => {
-//     const user = req.session.user || null; // Ensure 'user' is always defined
-
-//     if (user && user.role === "admin") {
-//         return res.redirect('/admin'); // Redirect admin users
-//     } else if (user && user.role === "store") {
-//         // return res.render('store', { user }); // Render Booker Dashboard
-//         return res.redirect('/store'); // Redirect store users change on 22 march 2025 by krishna
-//      } else {
-//         return res.render('store', { user: null }); // Ensure 'user' is always available
-//     }
-// });
-
-
-// module.exports = router;
-
-// // change by krishna on 22 march 
-// const express = require('express');
-// const router = express.Router();
-// const User = require('../models/user'); // Import User model chnge by krishna on 24 march
-
-// // Middleware to check if user is logged in
-// function isAuthenticated(req, res, next) {
-//     if (req.session && req.session.user) {
-//         return next(); // Proceed if authenticated
-//     }
-//     res.redirect("/login"); // Redirect to login if not authenticated
-// }
-
-// // Route to render store page if user_group is "store"
-// router.get('/store', isAuthenticated, (req, res) => {
-//     const user = req.session.user || null; // Ensure 'user' is always defined
-
-//     if (!user) {
-//         return res.redirect("/login"); // Redirect if no user is found
-//     }
-
-//     if (user.user_group === "store") {
-//         return res.redirect('/store'); // Redirect admin users
-//     } 
-//     else if (user.user_group === "admin") {
-//         return res.render('admin', { user }); // ✅ Render store.ejs for store users
-//     } 
-//     else {
-//         return res.redirect('/user-dashboard'); // ✅ Redirect others to user dashboard
-//     }
-// });
-
-// module.exports = router;
-
-
-// 
-
 const express = require('express');  
 const router = express.Router();
+const mongoose = require("mongoose");
 const db = require("../config/database"); // Ensure this points to your database configuration
 const Booking = require("../models/booking"); // Ensure this model exists
 
@@ -90,7 +26,7 @@ router.get("/store", isAuthenticated, async (req, res) => {
         }
 
         // Fetch VC Sessions for the store user
-        const [vcSessions] = await db.query("SELECT * FROM vc_sessions WHERE storeEmail = ?", [user.email]);
+        const vcSessions = await Booking.find({ email: user.email }); // MongoDB query
 
         res.render("store", { user, vcSessions }); // Pass vcSessions to EJS
     } catch (error) {
@@ -102,24 +38,44 @@ router.get("/store", isAuthenticated, async (req, res) => {
 // Route to handle VC booking
 router.post("/bookVC", async (req, res) => {
     try {
-        const { companyName, chairperson, designation, contactNumber, email, bookedBy, vcPurpose, remark, vcDuration, vcStartDate, vcEndDate } = req.body;
+        const { companyName, chairperson, designation, phone, email, bookedBy, vcPurpose, remark, vcDuration, vcStartDate, vcEndDate } = req.body;
 
-        // Generate a unique 6-digit booking ID
-        const bookingID = generateBookingID();
+        // ✅ Check if contactNumber or other required fields are missing
+        if (!companyName || !chairperson || !designation || !phone || !email || !bookedBy || !vcPurpose || !vcDuration || !vcStartDate || !vcEndDate) {
+            return res.status(400).send("❌ Missing required fields. Please fill all fields.");
+        }
 
-        // Insert booking into the database
-        const query = `INSERT INTO bookings (id, company_name, chairperson, designation, contact_number, email, booked_by, vc_purpose, remark, vc_duration, vc_start_date, vc_end_date, status) 
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-        const values = [bookingID, companyName, chairperson, designation, contactNumber, email, bookedBy, vcPurpose, remark, vcDuration, vcStartDate, vcEndDate, "Pending"];
+        // ✅ Generate a unique 6-digit booking ID
+        const bookingID = Math.floor(100000 + Math.random() * 900000);
 
-        await db.execute(query, values);
+        // ✅ Create a new booking document
+        const newBooking = new Booking({
+            bookingID,
+            companyName,
+            chairperson,
+            designation,
+            phone,  // Ensure this is provided
+            email,
+            bookedBy,
+            vcPurpose,
+            remark,
+            vcDuration,
+            vcStartDate,
+            vcEndDate,
+            status: "Pending"
+        });
 
-        res.status(200).send(`Booking Successful! Your Booking ID: ${bookingID}`);
+        // ✅ Save the booking in MongoDB
+        await newBooking.save();
+
+        res.status(200).send(`✅ Booking Successful! Your Booking ID: ${bookingID}`);
     } catch (error) {
-        console.error("Booking Error:", error);
+        console.error("❌ Booking Error:", error);
         res.status(500).send("Booking Failed. Please try again.");
     }
 });
+
+
 // Route to render the booking list page
 router.get("/booking-list", async (req, res) => {
     try {

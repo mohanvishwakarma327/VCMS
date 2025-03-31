@@ -75,8 +75,8 @@
                 <option value="Director">Director</option>
             </select>
         
-            <label for="contactNumber">Contact Number:</label>
-            <input type="tel" name="contactNumber" value="<%= user.phone %>" readonly> 
+            <label for="phone">Contact Number:</label>
+            <input type="phone" name="phone" value="<%= user.phone %>"> 
         
             <label for="email">E-Mail ID:</label>
             <input type="email" name="email" value="<%= user.email %>" readonly> 
@@ -133,44 +133,6 @@
     <div class="footer">
         <p>Powered by VCNow &copy; 2025. All rights reserved.</p>
     </div>
-    <!-- <script>
-    document.addEventListener("DOMContentLoaded", async function () {
-        async function fetchBookings() {
-            try {
-                const response = await fetch("/get-bookings"); // Fetch only logged-in user's bookings
-                if (!response.ok) throw new Error("Network response was not ok");
-
-                const bookings = await response.json();
-                const tableBody = document.getElementById("vcBookingsBody");
-                tableBody.innerHTML = ""; // Clear previous data
-
-                if (bookings.length === 0) {
-                    tableBody.innerHTML = "<tr><td colspan='6'>No VC sessions found.</td></tr>";
-                    return;
-                }
-
-                bookings.forEach((session) => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${session.companyName}</td>
-                        <td>${session.chairperson}</td>
-                        <td>${new Date(session.vcStartDate).toLocaleString()}</td>
-                        <td>${new Date(session.vcEndDate).toLocaleString()}</td>
-                        <td>${session.status === "approved" ? "✅ Approved" : session.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}</td>
-                        <td>${session.joinLink ? `<a href="${session.joinLink}" target="_blank">Join VC</a>` : "N/A"}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error("❌ Error fetching bookings:", error);
-                document.getElementById("vcBookingsBody").innerHTML = "<tr><td colspan='6'>Failed to load data.</td></tr>";
-            }
-        }
-
-        fetchBookings();
-        setInterval(fetchBookings, 60000); // Refresh every 1 min
-    });
-</script> -->
 
 <script>
     document.addEventListener("DOMContentLoaded", async function () {
