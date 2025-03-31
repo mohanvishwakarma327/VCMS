@@ -46,7 +46,7 @@ router.post("/bookVC", async (req, res) => {
         }
 
         // ✅ Generate a unique 6-digit booking ID
-        const bookingID = Math.floor(100000 + Math.random() * 900000);
+        const bookingID = Math.floor(100000 + Math.random() * 900000) +1 ;
 
         // ✅ Create a new booking document
         const newBooking = new Booking({
