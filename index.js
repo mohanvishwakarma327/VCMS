@@ -714,6 +714,18 @@ router.post("/approve-booking/:id", async (req, res) => {
     }
 });
 
+// for id booking show by krishna on 31 march 
+// app.get("/booking-list", async (req, res) => {
+//     try {
+//         const bookings = await BookingModel.find(); // Fetch all bookings from MongoDB
+//         res.render("booking-list", { bookings }); // Pass bookings to EJS template
+//     } catch (error) {
+//         console.error("Error fetching bookings:", error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// });
+
+
 
 // ✅ Logout Route
 app.get('/logout', (req, res) => {

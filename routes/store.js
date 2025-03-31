@@ -46,7 +46,7 @@ router.post("/bookVC", async (req, res) => {
         }
 
         // ✅ Generate a unique 6-digit booking ID
-        const bookingID = Math.floor(100000 + Math.random() * 900000) +1 ;
+        const bookingID = Math.floor(100000 + Math.random() * 900000) ;
 
         // ✅ Create a new booking document
         const newBooking = new Booking({
@@ -68,7 +68,9 @@ router.post("/bookVC", async (req, res) => {
         // ✅ Save the booking in MongoDB
         await newBooking.save();
 
-        res.status(200).send(`✅ Booking Successful! Your Booking ID: ${bookingID}`);
+        // res.status(200).send(`✅ Booking Successful! Your Booking ID: ${bookingID}`);
+        res.send(`<script>alert("✅ Booking Successful! Your Booking ID: ${bookingID}"); window.location.href='/store';</script>`);
+
     } catch (error) {
         console.error("❌ Booking Error:", error);
         res.status(500).send("Booking Failed. Please try again.");

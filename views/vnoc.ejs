@@ -63,18 +63,19 @@
                 <tbody>
                     <% bookings.forEach(booking => { %>
                         <tr>
-                            <td><%= booking.id %></td>
+                            <td><%= booking.bookingID %></td> <!-- Use _id for MongoDB -->
                             <td><%= booking.user %></td>
                             <td><%= booking.date %></td>
                             <td><span class="badge bg-info"><%= booking.status %></span></td>
                             <td>
-                                <a href="/booking/details/<%= booking.id %>" class="btn btn-primary btn-sm">
+                                <a href="/booking/details/<%= booking.bookingID %>" class="btn btn-primary btn-sm">
                                     View Details
                                 </a>
-                            </td> <!-- Link added -->
+                            </td>
                         </tr>
                     <% }); %>
                 </tbody>
+                
             </table>
         </div>
     </div>

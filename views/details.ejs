@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VC Bridge Booking Confirmation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-primary text-white text-center py-3">
+        <h2>📅 VC Bridge Booking Confirmation</h2>
+    </header>
+    
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-body">
+                <!-- Customer Details Table -->
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Company Name / Chair Person</th>
+                        <td><%= booking.company %></td>
+                        <th>Trans Id</th>
+                        <td><%= booking.transId %></td>
+                    </tr>
+                    <tr>
+                        <th>Chair Person Name</th>
+                        <td><%= booking.chairPerson %></td>
+                        <th>VC Type</th>
+                        <td><%= booking.vcType %></td>
+                    </tr>
+                    <tr>
+                        <th>Contact Number</th>
+                        <td><%= booking.contact %></td>
+                        <th>VC Start Date Time</th>
+                        <td><%= booking.startTime %></td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td><%= booking.email %></td>
+                        <th>VC End Date Time</th>
+                        <td><%= booking.endTime %></td>
+                    </tr>
+                </table>
+
+                <!-- Participants from UCS VC Studio -->
+                <h5 class="mt-4">Participants from UCS VC Studio</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Country</th>
+                            <th>City</th>
+                            <th>UCS VC Studio</th>
+                            <th>VC Room Name</th>
+                            <th>Video Number</th>
+                            <th>VC Room IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% booking.ucsParticipants.forEach(participant => { %>
+                            <tr>
+                                <td><%= participant.country %></td>
+                                <td><%= participant.city %></td>
+                                <td><%= participant.studio %></td>
+                                <td><%= participant.roomName %></td>
+                                <td><%= participant.videoNumber %></td>
+                                <td><%= participant.roomIP %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+
+                <!-- Form Table -->
+                <h5 class="mt-4">Booking Confirmation</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Conference Id</th>
+                        <td><input type="text" class="form-control" value="<%= booking.conferenceId %>" readonly></td>
+                    </tr>
+                    <tr>
+                        <th>Conference Name</th>
+                        <td><input type="text" class="form-control"></td>
+                    </tr>
+                    <tr>
+                        <th>Bridge Id</th>
+                        <td>
+                            <select class="form-select">
+                                <option>Please Select</option>
+                                <!-- Add dynamic options here -->
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Remarks/Dial In Details</th>
+                        <td><textarea class="form-control"></textarea></td>
+                    </tr>
+                    <tr>
+                        <th>Reason For Rejection</th>
+                        <td>
+                            <select class="form-select">
+                                <option>Please Select</option>
+                                <!-- Add dynamic options here -->
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                
+                <!-- Buttons -->
+                <div class="text-center mt-3">
+                    <button class="btn btn-success">Booking Accepted</button>
+                    <button class="btn btn-danger">Booking Rejected</button>
+                    <button class="btn btn-secondary">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-4">
+        <p>Copyright &copy; 2025. All rights reserved.</p>
+    </footer>
+</body>
+</html>
