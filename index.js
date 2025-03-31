@@ -316,6 +316,19 @@ router.post('/login', async (req, res) => {
     }
 });
 
+app.get('/vnoc', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login'); // Redirect if not logged in
+    }
+    res.render('vnoc', { 
+        user: req.session.user,  // Pass the logged-in user
+        bookings, 
+        vcSessions, 
+        reports, 
+        cancelRequests 
+    });
+});
+
 // write on 24 marchh by krishna
 app.get('/vnoc', async (req, res) => { 
     try {

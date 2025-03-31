@@ -62,29 +62,47 @@
                 </div>
             </div>
 
-            <!-- Booking List -->
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-header bg-warning text-dark">
-                        <h5>📅 Booking List</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-bordered">
-                            <thead><tr><th>Booking ID</th><th>User</th><th>Date</th><th>Status</th></tr></thead>
-                            <tbody>
-                                <% bookings.forEach(booking => { %>
-                                    <tr>
-                                        <td><%= booking.id %></td>
-                                        <td><%= booking.user %></td>
-                                        <td><%= booking.date %></td>
-                                        <td><span class="badge bg-info"><%= booking.status %></span></td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+           <!-- Booking List -->
+<div class="col-md-6">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h5>📅 Booking List</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>User</th>
+                        <th>Company Name</th>
+                        <th>Date</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Booking Time (Hrs)</th>
+                        <th>VC Duration</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% bookings.forEach(booking => { %>
+                        <tr>
+                            <td><%= booking.id %></td>
+                            <td><%= booking.user %></td>
+                            <td><%= booking.company %></td>
+                            <td><%= booking.date %></td>
+                            <td><%= booking.startTime %></td>
+                            <td><%= booking.endTime %></td>
+                            <td><%= booking.bookingTimeHrs %></td>
+                            <td><%= booking.vcDuration %></td>
+                            <td><span class="badge bg-info"><%= booking.status %></span></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 
             <!-- VC Track Section -->
             <div class="col-md-6">

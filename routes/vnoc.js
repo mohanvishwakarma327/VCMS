@@ -97,11 +97,19 @@ router.get("/vnoc", async (req, res) => {
 
         // ✅ Reports array for reports table
         const reports = allBookings.map(booking => ({
-            id: booking._id, 
+            id: booking._id,
             type: "VC Booking",
             date: new Date(booking.createdAt).toLocaleDateString(),
-            status: booking.status
+            status: booking.status,
+            bookingTimeHrs: booking.bookingTimeHrs,
+            companyName: booking.company,  // Fixed typo: "compamyname" → "companyName"
+            vcDuration: booking.vcDuration,
         }));
+        
+
+        const bookings = await Booking.find().select(
+    "id user company date startTime endTime bookingTimeHrs vcDuration status"
+);
 
         // ✅ Ensure bookings is passed
         res.render("vnoc", { 
