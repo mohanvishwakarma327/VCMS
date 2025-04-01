@@ -27,11 +27,8 @@ const vnocRoutes = require('./routes/vnoc'); // Import store routes write on 26 
 const vcReportRoutes = require("./routes/vc-reports"); // Import VC Report Route write on 26 march by krishna
 const BookingModel = require('./models/booking'); // Ensure correct path write on 27 march by krishna
 const VCBookingModel = require('./models/vcBooking');  // Adjust path as needed
-
-
-
-
-
+const detailsRouter = require("./routes/details");
+const Booking = require("./models/details"); // Adjust the path as needed
 
 const authenticateJWT = (req, res, next) => {
     const token = req.cookies.token; // Assuming token is stored in cookies
@@ -102,9 +99,6 @@ app.use(express.static('public'));   //write on 26 march by krishna
 app.use(vcReportRoutes); // Use the VC Report route write on 26 march by krishna
 app.use("/", storeRoutes); // Use the store route write on 31 march by krishna
 
-
-
-
 // Import Routes change on 21 march by krishna 
 const deleteUserRoute = require("./routes/delete_user");
 app.use("/", deleteUserRoute); // w o 21-03-25
@@ -121,6 +115,34 @@ app.use(session({
 app.post('/forgot-password', (req, res) => {
     res.json({ message: 'Forgot password route working!' });
 });
+
+// Routes
+const bookingRoutes = require("./routes/details");
+app.use("/details", bookingRoutes);
+app.get('/details/:_id', async (req, res) => {
+    const bookingID = req.params._id; // Ensure _id is used correctly
+
+    try {
+        // Validate MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(bookingID)) {
+            return res.status(400).send("Invalid Booking ID");
+        }
+
+        // Fetch booking from MongoDB
+        const booking = await Booking.findById(bookingID);
+
+        if (!booking) {
+            return res.status(404).send("Booking not found");
+        }
+
+        // Render the details page with booking data
+        res.render('details', { booking });
+    } catch (error) {
+        console.error("Error fetching booking:", error);
+        res.status(500).send("Server Error");
+    }
+});
+
 
 // ✅ LOGIN SYSTEM
 app.get('/', (_, res) => 

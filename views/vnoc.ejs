@@ -53,27 +53,28 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Booking ID</th>
+                        <th>Trans ID</th>
                         <th>User</th>
                         <th>Date</th>
-                        <th>Status</th>
-                        <th>Company</th> <!-- Fixed: Now using booking -->
-                        <th>Booking Time</th>     <!-- Fixed: Now using booking -->
-                        <th>Action</th> <!-- New column for the button -->
+                        <th>Time</th> <!-- Fixed: Now using booking -->
+                        <th>Comapany Name</th>     <!-- Fixed: Now using booking -->
+                        <th>VC duration</th> <!-- New column for the button -->
+                        <th>Status</th> 
+                        <th>Details</th> 
                     </tr>
                 </thead>
                 <tbody>
                     <% bookings.forEach(booking => { %> 
                         <tr>
-                            <td><%= booking._id %></td> <!-- Use _id for MongoDB -->
-                            <td><%= booking.user %></td>
-                            <td><%= booking.date %></td>
-                            <td><%= booking.bookingTimeHrs %></td>  <!-- Fixed: Now using booking -->
-                            <td><%= booking.company %></td>        <!-- Fixed: Now using booking -->
+                            <td><%= booking.bookingID %></td> <!-- Use _id for MongoDB -->
+                            <td><%= booking.chairperson %></td>
+                            <td><%= booking.vcStartDate %></td>
+                            <td><%= booking.vcEndDate %></td>  <!-- Fixed: Now using booking -->
+                            <td><%= booking.companyName %></td>        <!-- Fixed: Now using booking -->
                             <td><%= booking.vcDuration %></td>     <!-- Fixed: Now using booking -->
                             <td><span class="badge bg-info"><%= booking.status %></span></td>
                             <td>
-                                <a href="/booking/details/<%= booking._id %>" class="btn btn-primary btn-sm">
+                                <a href="/details/<%= booking._id %>" class="btn btn-primary btn-sm">
                                     View Details
                                 </a>
                             </td>
@@ -163,7 +164,7 @@
                 <tbody>
                     <% reports.forEach(report => { %>
                         <tr>
-                            <td><%= report.id %></td>
+                            <td><%= report.bookingID %></td>
                             <td><%= report.type %></td>
                             <td><%= report.date %></td>
                             <td><span class="badge bg-success"><%= report.status %></span></td>
