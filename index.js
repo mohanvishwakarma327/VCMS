@@ -29,6 +29,8 @@ const BookingModel = require('./models/booking'); // Ensure correct path write o
 const VCBookingModel = require('./models/vcBooking');  // Adjust path as needed
 const detailsRouter = require("./routes/details");
 const Booking = require("./models/details"); // Adjust the path as needed
+const BookingConfirmationRoutes = require("./routes/BookingConfirmation"); // Adjust the path as needed
+
 
 const authenticateJWT = (req, res, next) => {
     const token = req.cookies.token; // Assuming token is stored in cookies
@@ -98,6 +100,9 @@ app.use(session({
 app.use(express.static('public'));   //write on 26 march by krishna
 app.use(vcReportRoutes); // Use the VC Report route write on 26 march by krishna
 app.use("/", storeRoutes); // Use the store route write on 31 march by krishna
+
+// Routes
+app.use("/BookingConfirmation", BookingConfirmationRoutes);
 
 // Import Routes change on 21 march by krishna 
 const deleteUserRoute = require("./routes/delete_user");
@@ -759,6 +764,8 @@ router.post("/approve-booking/:id", async (req, res) => {
 //         res.status(500).send("Internal Server Error");
 //     }
 // });
+
+
 
 
 

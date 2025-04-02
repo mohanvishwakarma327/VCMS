@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation Page</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Find/Confirm VC Session</h2>
+        <table class="table table-bordered table-striped text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Conference Name</th>
+                    <th>Bridge ID</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (confirmedBookings.length > 0) { %>
+                    <% confirmedBookings.forEach(booking => { %>
+                        <tr>
+                            <td><%= booking.bookingId %></td>
+                            <td><%= booking.conferenceName %></td>
+                            <td><%= booking.bridgeId %></td>
+                            <td>
+                                <% if (booking.status === "Accepted") { %>
+                                    <span class="badge bg-success">✅ Accepted</span>
+                                <% } else if (booking.status === "Rejected") { %>
+                                    <span class="badge bg-danger">❌ Rejected</span>
+                                <% } else { %>
+                                    <span class="badge bg-warning text-dark">⏳ Pending</span>
+                                <% } %>
+                            </td>
+                            <td><%= booking.remarks || "N/A" %></td>
+                            <td><%= new Date(booking.createdAt).toLocaleString() %></td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="6" class="text-center">No confirmed bookings found.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

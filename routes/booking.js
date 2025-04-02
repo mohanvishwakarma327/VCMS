@@ -33,4 +33,41 @@ router.post("/add-booking", async (req, res) => {
     }
 });
 
+
+// Handle booking confirmation
+router.post("/confirm", async (req, res) => {
+    try {
+        const { bookingID, conferenceName, bridgeId, remarks, rejectionReason, status } = req.body;
+
+        let updateData = {
+            conferenceName,
+            bridgeId,
+            remarks: remarks || "N/A",
+            status
+        };
+
+        if (status === "Rejected") {
+            updateData.remarks = rejectionReason || "Rejected";
+        }
+
+        // Debugging Line
+        console.log("Updating Booking:", bookingID, "with Status:", status);
+
+        // Update booking in MongoDB
+        const updatedBooking = await Booking.findOneAndUpdate(
+            { bookingId: bookingID },
+            updateData,
+            { new: true } // Return the updated document
+        );
+
+        console.log("Updated Booking:", updatedBooking); // Debugging Line
+
+        // Redirect to the confirmation page
+        res.redirect("/confirmation");
+    } catch (error) {
+        console.error("Error confirming booking:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 module.exports = router;

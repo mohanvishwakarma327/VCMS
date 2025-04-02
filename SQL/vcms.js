@@ -64,6 +64,17 @@ const vcBookingSchema = new mongoose.Schema({
     created_at: { type: Date, default: Date.now }
 });
 
+// for vc confirmation
+const BookingConfirmationSchema = new mongoose.Schema({
+    bookingId: { type: String, required: true }, 
+    conferenceName: { type: String, required: true }, 
+    bridgeId: { type: String, required: true },
+    remarks: { type: String }, 
+    rejectionReason: { type: String },
+    status: { type: String, enum: ["Accepted", "Rejected"], default: "Accepted" }, // Store booking status
+    createdAt: { type: Date, default: Date.now } 
+});
+
 // ✅ Create Models
 // const User = mongoose.model("User", userSchema);
 // const Client = mongoose.model("Client", clientSchema);
@@ -122,6 +133,32 @@ async function deleteUser(email) {
 
 
 
+// Function to Insert Data
+const insertBookingConfirmation = async () => {
+    try {
+        const newBooking = new BookingConfirmation({
+            bookingId: "123456",
+            conferenceName: "Annual Tech Conference",
+            bridgeId: "Bridge1",
+            remarks: "VIP access required",
+            rejectionReason: null, // Set if status is 'Rejected'
+            status: "Accepted"
+        });
+
+        const savedBooking = await newBooking.save();
+        console.log("✅ Booking saved:", savedBooking);
+    } catch (error) {
+        console.error("❌ Error inserting booking:", error);
+    } finally {
+        mongoose.connection.close(); // Close connection after insertion
+    }
+};
+
+// // Call the function
+// insertBookingConfirmation();
+
+
+module.exports = mongoose.model("BookingConfirmation", BookingConfirmationSchema);
 // ✅ Export Models (Fixed)
 module.exports = { vcms, User, Client, VCBooking };
 

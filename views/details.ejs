@@ -77,46 +77,61 @@
                 <% } %>
 
                 <!-- Form Table -->
-                <h5 class="mt-4">Booking Confirmation</h5>
-                <table class="table table-bordered">
-                    <tr>
-                        <th>Conference Id</th>
-                        <td><input type="text" class="form-control" value="<%= booking.conferenceId %>" readonly></td>
-                    </tr>
-                    <tr>
-                        <th>Conference Name</th>
-                        <td><input type="text" class="form-control"></td>
-                    </tr>
-                    <tr>
-                        <th>Bridge Id</th>
-                        <td>
-                            <select class="form-select">
-                                <option>Please Select</option>
-                                <!-- Add dynamic options here -->
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Remarks/Dial In Details</th>
-                        <td><textarea class="form-control"></textarea></td>
-                    </tr>
-                    <tr>
-                        <th>Reason For Rejection</th>
-                        <td>
-                            <select class="form-select">
-                                <option>Please Select</option>
-                                <!-- Add dynamic options here -->
-                            </select>
-                        </td>
-                    </tr>
-                </table>
+                <form action="/booking/confirm" method="POST">
+                    <h5 class="mt-4">Booking Confirmation</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Booking ID</th>
+                            <td><input type="text" name="bookingID" class="form-control" value="<%= booking.bookingID %>" readonly></td>
+                        </tr>
+                        <tr>
+                            <th>Conference Name</th>
+                            <td><input type="text" name="conferenceName" class="form-control" required></td>
+                        </tr>
+                        <tr>
+                            <th>Bridge Id</th>
+                            <td>
+                                <select name="bridgeId" class="form-select" required>
+                                    <option value="">Please Select</option>
+                                    <option value="Bridge-1">Bridge-1</option>
+                                    <option value="Bridge-2">Bridge-2</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Remarks/Dial In Details</th>
+                            <td><textarea name="remarks" class="form-control"></textarea></td>
+                        </tr>
+                        <tr>
+                            <th>Reason For Rejection</th>
+                            <td>
+                                <select name="rejectionReason" class="form-select">
+                                    <option value="">Please Select</option>
+                                    <option value="Invalid Details">Invalid Details</option>
+                                    <option value="Duplicate Booking">Duplicate Booking</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                
+                    <div class="text-center mt-3">
+                        <button type="submit" name="status" value="Accepted" class="btn btn-success">Booking Accepted</button>
+                        <button type="submit" name="status" value="Rejected" class="btn btn-danger">Booking Rejected</button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
+                    </div>
+                </form>
+
+                <!-- Success Message -->
+<div id="successMessage" style="display: none; color: green; text-align: center; margin-top: 10px;">
+    ✅ Booking confirmed successfully!
+</div>
 
                 <!-- Buttons -->
-                <div class="text-center mt-3">
+                <!-- <div class="text-center mt-3">
                     <button class="btn btn-success">Booking Accepted</button>
                     <button class="btn btn-danger">Booking Rejected</button>
                     <button class="btn btn-secondary">Reset</button>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -125,6 +140,32 @@
     <footer class="bg-dark text-white text-center py-3 mt-4">
         <p>Copyright &copy; 2025. All rights reserved.</p>
     </footer>
+
+
+    <script>
+        document.getElementById("bookingForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent default form submission
+    
+            let formData = new FormData(this); // Get form data
+    
+            fetch("/booking/confirm", {
+                method: "POST",
+                body: new URLSearchParams(formData), // Convert FormData to URL encoded format
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("successMessage").style.display = "block"; // Show success message
+                } else {
+                    alert("Error: " + data.error); // Show error message if something goes wrong
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
 </body>
 
 </html>
