@@ -314,6 +314,17 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ message: "❌ Internal Server Error. Please try again." });
     }
 });
+// API to fetch confirmed bookings
+router.get("/store/api/confirmation", async (req, res) => {
+    try {
+        const bookings = await BookingConfirmation.find({}); // Fetch all bookings
+        console.log("📌 Retrieved Confirmed Bookings:", bookings); // Debugging
+        res.json(bookings);
+    } catch (error) {
+        console.error("❌ Error fetching bookings:", error);
+        res.status(500).json({ error: "Failed to fetch data" });
+    }
+});
 
 
 // 🏠 Dashboard Route

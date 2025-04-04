@@ -142,7 +142,7 @@
     </footer>
 
 
-    <!-- <script>
+    <script>
         document.getElementById("bookingForm").addEventListener("submit", function(event) {
             event.preventDefault(); // Prevent default form submission
     
@@ -166,36 +166,7 @@
             .catch(error => console.error("Error:", error));
         });
         
-    </script> -->
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const bookingForm = document.querySelector("form");
-    
-            bookingForm.addEventListener("submit", async function (event) {
-                event.preventDefault(); // Prevent form from refreshing the page
-    
-                let formData = new FormData(bookingForm);
-                let response = await fetch("/booking/confirm", {
-                    method: "POST",
-                    body: new URLSearchParams(formData), // Convert FormData to URL encoded
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
-                });
-    
-                let data = await response.json();
-    
-                if (data.success) {
-                    document.getElementById("successMessage").style.display = "block"; // Show success message
-                    setTimeout(() => {
-                        window.location.href = "/store/confirmation"; // Redirect to confirmation page
-                    }, 1500);
-                } else {
-                    alert("Error: " + data.error);
-                }
-            });
-        });
     </script>
-    
 </body>
 
 </html>
