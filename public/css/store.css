@@ -165,3 +165,49 @@ table th {
 .logout-btn:hover {
     background-color: #cc0000;
 }
+/* Dropdown Button */
+.navbar .dropdown .dropbtn {
+    background-color: #004aad;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    border: none;
+    cursor: pointer;
+}
+
+/* Dropdown Container */
+.navbar .dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content */
+.navbar .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #004aad;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px #004aad(0, 0, 0, 0.2);
+    z-index: 10;
+    border-radius: 5px;
+}
+
+/* Dropdown Links */
+.navbar .dropdown-content a {
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    transition: background 0.3s ease-in-out;
+}
+
+/* Hover Effect */
+.navbar .dropdown-content a:hover {
+    background-color: #004aad;
+}
+
+/* Show Dropdown on Hover */
+.navbar .dropdown:hover .dropdown-content {
+    display: block;
+}

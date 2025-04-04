@@ -30,6 +30,7 @@ const VCBookingModel = require('./models/vcBooking');  // Adjust path as needed
 const detailsRouter = require("./routes/details");
 const Booking = require("./models/details"); // Adjust the path as needed
 const BookingConfirmationRoutes = require("./routes/BookingConfirmation"); // Adjust the path as needed
+const confirmationsRoute = require("./routes/confirmations");
 
 
 const authenticateJWT = (req, res, next) => {
@@ -63,6 +64,8 @@ module.exports = app;
 //Routes Middleware
 
 // Routes
+app.use("/store", storeRoutes); // this allows /store/confirmation to work
+app.use("/confirmations", confirmationsRoute);
 app.use(dashboardRoutes);
 app.use("/vnoc", vnocRoutes);
 app.use("/auth", require("./routes/auth")); // Ensure this path is correct

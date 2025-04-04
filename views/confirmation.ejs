@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="mb-4 text-center">Find/Confirm VC Session</h2>
+        <h2 class="mb-4 text-center">Confirm VC Session</h2>
         <table class="table table-bordered table-striped text-center">
             <thead class="table-dark">
                 <tr>
@@ -20,33 +20,96 @@
                     <th>Created At</th>
                 </tr>
             </thead>
-            <tbody>
-                <% if (confirmedBookings.length > 0) { %>
-                    <% confirmedBookings.forEach(booking => { %>
-                        <tr>
-                            <td><%= booking.bookingId %></td>
-                            <td><%= booking.conferenceName %></td>
-                            <td><%= booking.bridgeId %></td>
-                            <td>
-                                <% if (booking.status === "Accepted") { %>
-                                    <span class="badge bg-success">✅ Accepted</span>
-                                <% } else if (booking.status === "Rejected") { %>
-                                    <span class="badge bg-danger">❌ Rejected</span>
-                                <% } else { %>
-                                    <span class="badge bg-warning text-dark">⏳ Pending</span>
-                                <% } %>
-                            </td>
-                            <td><%= booking.remarks || "N/A" %></td>
-                            <td><%= new Date(booking.createdAt).toLocaleString() %></td>
-                        </tr>
-                    <% }); %>
-                <% } else { %>
-                    <tr>
-                        <td colspan="6" class="text-center">No confirmed bookings found.</td>
-                    </tr>
-                <% } %>
-            </tbody>
+            <tbody id="bookingTableBody">
+                <tr>
+                    <td colspan="6" class="text-center">Loading...</td>
+                </tr>
+            </tbody>                
         </table>
     </div>
+
+    <!-- <script>
+        async function fetchConfirmedBookings() {
+            try {
+                const response = await fetch("/store/api/confirmation");
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const bookings = await response.json();
+                const tableBody = document.getElementById("bookingTableBody");
+                tableBody.innerHTML = ""; // Clear existing content
+
+                if (bookings.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No confirmed bookings found.</td></tr>`;
+                    return;
+                }
+
+                bookings.forEach(booking => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${booking.bookingID || "N/A"}</td>
+                        <td>${booking.conferenceName || "N/A"}</td>
+                        <td>${booking.bridgeId || "N/A"}</td>
+                        <td>
+                            ${booking.status === "Accepted" ? '<span class="badge bg-success">✅ Accepted</span>' 
+                            : booking.status === "Rejected" ? '<span class="badge bg-danger">❌ Rejected</span>' 
+                            : '<span class="badge bg-warning text-dark">⏳ Pending</span>'}
+                        </td>
+                        <td>${booking.remarks || "N/A"}</td>
+                        <td>${new Date(booking.createdAt).toLocaleString()}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error("❌ Error fetching bookings:", error);
+                document.getElementById("bookingTableBody").innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to load data.</td></tr>`;
+            }
+        }
+
+        // Fetch data when the page loads
+        document.addEventListener("DOMContentLoaded", fetchConfirmedBookings);
+    </script> -->
+    <script>
+        async function fetchConfirmedBookings() {
+            try {
+                const response = await fetch("/store/api/confirmation"); 
+                if (!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
+        
+                const bookings = await response.json();
+                console.log("✅ Data received:", bookings);
+        
+                const tableBody = document.getElementById("bookingTableBody");
+                tableBody.innerHTML = ""; // Clear table
+        
+                if (!bookings.length) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No confirmed bookings found.</td></tr>`;
+                    return;
+                }
+        
+                bookings.forEach(booking => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${booking.bookingID || "N/A"}</td>
+                        <td>${booking.conferenceName || "N/A"}</td>
+                        <td>${booking.bridgeId || "N/A"}</td>
+                        <td>
+                            ${booking.status === "Accepted" ? '<span class="badge bg-success">✅ Accepted</span>' 
+                            : booking.status === "Rejected" ? '<span class="badge bg-danger">❌ Rejected</span>' 
+                            : '<span class="badge bg-warning text-dark">⏳ Pending</span>'}
+                        </td>
+                        <td>${booking.remarks || "N/A"}</td>
+                        <td>${new Date(booking.createdAt).toLocaleString()}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+        
+            } catch (error) {
+                console.error("❌ Fetch error:", error);
+                document.getElementById("bookingTableBody").innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to load data.</td></tr>`;
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", fetchConfirmedBookings);
+        
+    </script>
 </body>
 </html>
