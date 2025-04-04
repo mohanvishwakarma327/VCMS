@@ -1,14 +1,30 @@
-const express = require('express');   
+const express = require("express");
 const router = express.Router();
-const Booking = require("../models/booking"); // Ensure this model exists
+const Booking = require("../models/Booking"); // Ensure this model exists
 const BookingConfirmation = require("../models/BookingConfirmation");
 
-// Middleware to check if user is logged in
+// ✅ Middleware to check if user is logged in
 function isAuthenticated(req, res, next) {
     if (req.session && req.session.user) {
         return next();
     }
     res.redirect("/login");
+}
+
+// ✅ Generate a sequential booking ID starting from 200000
+async function generateSequentialBookingID() {
+    try {
+        const lastBooking = await Booking.findOne().sort({ bookingID: -1 });
+
+        if (lastBooking && lastBooking.bookingID) {
+            return Number(lastBooking.bookingID) + 1; // Increment last booking ID
+        } else {
+            return 200000; // Start from 200000 if no records exist
+        }
+    } catch (error) {
+        console.error("❌ Error generating booking ID:", error);
+        return 200000; // Fallback if an error occurs
+    }
 }
 
 // ✅ Route to render store page for store users
@@ -41,8 +57,8 @@ router.post("/bookVC", async (req, res) => {
             return res.status(400).send("❌ Missing required fields.");
         }
 
-        // Generate a unique 6-digit booking ID
-        const bookingID = Math.floor(100000 + Math.random() * 900000);
+        // Get next sequential booking ID
+        const bookingID = await generateSequentialBookingID();
 
         // Create and save new booking
         const newBooking = new Booking({
@@ -58,7 +74,8 @@ router.post("/bookVC", async (req, res) => {
             vcDuration,
             vcStartDate,
             vcEndDate,
-            status: "Pending"
+            status: "Pending",
+            createdAt: new Date(),
         });
 
         await newBooking.save();
@@ -73,7 +90,7 @@ router.post("/bookVC", async (req, res) => {
 // ✅ Route to render booking list
 router.get("/booking-list", async (req, res) => {
     try {
-        const bookings = await Booking.find();
+        const bookings = await Booking.find().sort({ createdAt: -1 });
         res.render("booking-list", { bookings });
     } catch (error) {
         console.error("❌ Error fetching bookings:", error);
@@ -97,7 +114,8 @@ router.post("/booking/confirm", async (req, res) => {
             bridgeId,
             remarks,
             rejectionReason: status === "Rejected" ? rejectionReason : null,
-            status
+            status,
+            createdAt: new Date(),
         });
 
         await newConfirmation.save();
@@ -132,6 +150,5 @@ router.get("/confirmation", async (req, res) => {
         res.render("confirmation", { bookings: [] }); // ✅ Ensure bookings is always defined
     }
 });
-
 
 module.exports = router;

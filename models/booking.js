@@ -50,4 +50,9 @@ const BookingSchema = new mongoose.Schema({
     status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" }
 }, { timestamps: true });
 
-module.exports = mongoose.model("Booking", BookingSchema);
+// ✅ Ensure the model is not registered multiple times
+const Booking = mongoose.models.Booking || mongoose.model("Booking", BookingSchema);
+
+module.exports = Booking;
+
+

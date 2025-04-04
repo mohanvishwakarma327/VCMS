@@ -25,7 +25,7 @@ const jwt = require('jsonwebtoken');
 const storeRoutes = require('./routes/store'); // Import store routes write on 26 march by krishna
 const vnocRoutes = require('./routes/vnoc'); // Import store routes write on 26 march by krishna
 const vcReportRoutes = require("./routes/vc-reports"); // Import VC Report Route write on 26 march by krishna
-const BookingModel = require('./models/booking'); // Ensure correct path write on 27 march by krishna
+// Ensure correct path write on 27 march by krishna
 const VCBookingModel = require('./models/vcBooking');  // Adjust path as needed
 const detailsRouter = require("./routes/details");
 const Booking = require("./models/details"); // Adjust the path as needed
