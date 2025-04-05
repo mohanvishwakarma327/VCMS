@@ -49,28 +49,66 @@
     </div>
 
     <div id="reportResults" class="report-container"></div>
-
     <script>
-        document.getElementById("bookingForm").addEventListener("submit", async function (event) {
+        document.getElementById("dailyReportsForm").addEventListener("submit", async function (event) {
             event.preventDefault();
     
-            const storeName = document.getElementById("storeName").value;
-            const storeEmail = document.getElementById("storeEmail").value;
-            const date = document.getElementById("date").value;
-            const time = document.getElementById("time").value;
+            const selectedDate = document.getElementById("dailyReportDate").value;
+            if (!selectedDate) {
+                alert("Please select a date!");
+                return;
+            }
     
-            const response = await fetch("/book-vc", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ storeName, storeEmail, date, time })
-            });
+            try {
+                const response = await fetch(`/reports/daily-report?date=${selectedDate}`);
+                if (!response.ok) throw new Error("Failed to fetch reports!");
     
-            const result = await response.json();
-            alert(result.message);
+                const reports = await response.json();
+                console.log("✅ Reports Data:", reports);
+    
+                const reportContainer = document.getElementById("reportResults");
+                reportContainer.innerHTML = ""; // Clear previous results
+    
+                if (reports.length === 0) {
+                    reportContainer.innerHTML = "<p>No approved bookings found for the selected date.</p>";
+                    return;
+                }
+    
+                // Create a table
+                let tableHTML = `
+                    <table border="1">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Conference Name</th>
+                            <th>Bridge ID</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th>Created At</th>
+                        </tr>
+                `;
+    
+                reports.forEach(report => {
+                    tableHTML += `
+                        <tr>
+                            <td>${report.bookingID}</td>
+                            <td>${report.conferenceName}</td>
+                            <td>${report.bridgeId}</td>
+                            <td><span class="badge bg-success">${report.status}</span></td>
+                            <td>${report.remarks || "N/A"}</td>
+                            <td>${new Date(report.createdAt).toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
+    
+                tableHTML += `</table>`;
+                reportContainer.innerHTML = tableHTML;
+    
+            } catch (error) {
+                console.error("❌ Error fetching reports:", error);
+                document.getElementById("reportResults").innerHTML = `<p class="text-danger">Failed to load reports.</p>`;
+            }
         });
     </script>
-    
-
 </body>
 </html>
 

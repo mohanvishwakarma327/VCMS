@@ -57,26 +57,27 @@
         <h2>VC BOOKING</h2>
         <form action="/bookVC" method="post">
             <label for="companyName">Name of Organisation:</label>
-<select name="companyName" required>
-    <option value="">Please Select</option>
-    <option value="Hindustan Unilever Ltd-W215">Hindustan Unilever Ltd-W215</option>
-    <option value="Tata Consultancy Services">Tata Consultancy Services</option>
-    <option value="Infosys Ltd">Infosys Ltd</option>
-    <option value="Wipro Technologies">Wipro Technologies</option>
-    <option value="Reliance Industries">Reliance Industries</option>
-    <option value="Adani Enterprises">Adani Enterprises</option>
-    <option value="Larsen & Toubro">Larsen & Toubro</option>
-    <option value="ICICI Bank">ICICI Bank</option>
-    <option value="HDFC Bank">HDFC Bank</option>
-    <option value="Bharti Airtel">Bharti Airtel</option>
-</select>
+            <select name="companyName" required>
+                <option value="">Please Select</option>
+                <option value="Hindustan Unilever Ltd-W215">Hindustan Unilever Ltd-W215</option>
+                <option value="W208 Home Care">W208 Home Care</option>
+                <option value="W209 Personal Care">W209 Personal Care</option>
+                <option value="W210 Refreshment">W210 Refreshment</option>
+                <option value="W321 Mumbai Mapped">W321 Mumbai Mapped</option>
+                <option value="W322 Kolkata Mapped">W322 Kolkata Mapped</option>
+                <option value="W323 Delhi Mapped">W323 Delhi Mapped</option>
+                <option value="W324 Chennai Mapped">W324 Chennai Mapped</option>
+                <option value="N207 Ice Cream">N207 Ice Cream</option>
+                <option value="NUT 20 Nutrition">NUT 20 Nutrition</option>
+            </select>
 
-        
             <label for="chairperson">Name of Chairperson:</label>
             <select name="chairperson" required>
                 <option value="">Please Select</option>
                 <option value="Chairperson A">Chairperson A</option>
-                <option value="Chairperson B">Sanjay</option>
+                <option value="Sanjay">Sanjay</option>
+                <option value="Shiddesh">Shiddesh</option>
+                <option value="Abhishek">Abhishek</option>
             </select>
         
             <label for="designation">Designation:</label>
@@ -106,8 +107,8 @@
             <label for="remark">Remark:</label>
             <textarea name="remark"></textarea>
         
-            <label for="vcDuration">VC Duration:</label>
-            <input type="number" name="vcDuration" min="0.5" step="0.5" required>
+            <!-- <label for="vcDuration">VC Duration:</label>
+            <input type="number" name="vcDuration" min="0.5" step="0.5" required> -->
         
             <label>Start Date & Time:</label>
             <input type="datetime-local" name="vcStartDate" id="vcStartDate" required>
@@ -148,78 +149,86 @@
         <p>Powered by VCNow &copy; 2025. All rights reserved.</p>
     </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", async function () {
-        async function fetchBookings() {
-            try {
-                console.log("Fetching bookings..."); // Debugging log
-
-                const response = await fetch("/get-bookings", { credentials: "include" }); // Include session cookies
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                const bookings = await response.json();
-                console.log("Bookings received:", bookings); // Debugging log
-
-                const tableBody = document.getElementById("vcBookingsBody");
-                tableBody.innerHTML = ""; // Clear previous data
-
-                if (!bookings.length) {
-                    tableBody.innerHTML = "<tr><td colspan='6'>No VC sessions found.</td></tr>";
-                    return;
+    <script> 
+        document.addEventListener("DOMContentLoaded", async function () {
+            async function fetchBookings() {
+                try {
+                    console.log("Fetching bookings..."); // Debugging log
+    
+                    const response = await fetch("/get-bookings", { credentials: "include" });
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    
+                    const bookings = await response.json();
+                    console.log("Bookings received:", bookings);
+    
+                    const tableBody = document.getElementById("vcBookingsBody");
+                    tableBody.innerHTML = "";
+    
+                    if (!bookings.length) {
+                        tableBody.innerHTML = "<tr><td colspan='6'>No VC sessions found.</td></tr>";
+                        return;
+                    }
+    
+                    bookings.forEach(session => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${session.companyName}</td>
+                            <td>${session.chairperson}</td>
+                            <td>${formatDate(session.vcStartDate)}</td>
+                            <td>${formatDate(session.vcEndDate)}</td>
+                            <td>${session.status === "approved" ? "✅ Approved" : session.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}</td>
+                            <td>${session.joinLink ? `<a href="${session.joinLink}" target="_blank">Join VC</a>` : "N/A"}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+    
+                } catch (error) {
+                    console.error("❌ Error fetching bookings:", error);
+                    document.getElementById("vcBookingsBody").innerHTML = "<tr><td colspan='6'>Failed to load data.</td></tr>";
                 }
-
-                bookings.forEach(session => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${session.companyName}</td>
-                        <td>${session.chairperson}</td>
-                        <td>${new Date(session.vcStartDate).toLocaleString()}</td>
-                        <td>${new Date(session.vcEndDate).toLocaleString()}</td>
-                        <td>${session.status === "approved" ? "✅ Approved" : session.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}</td>
-                        <td>${session.joinLink ? `<a href="${session.joinLink}" target="_blank">Join VC</a>` : "N/A"}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-
-            } catch (error) {
-                console.error("❌ Error fetching bookings:", error);
-                document.getElementById("vcBookingsBody").innerHTML = "<tr><td colspan='6'>Failed to load data.</td></tr>";
             }
+    
+            fetchBookings();
+            setInterval(fetchBookings, 60000); // Refresh every 1 min
+        });
+    
+        // 🔧 Format Date to DD/MM/YYYY
+        function formatDate(inputDate) {
+            const date = new Date(inputDate);
+        
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+        
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+        
+            return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
         }
-
-        fetchBookings();
-        setInterval(fetchBookings, 60000); // Refresh every 1 min
-    });
-    function formatDate(inputDate) {
-        let date = new Date(inputDate);
-        let day = String(date.getDate()).padStart(2, '0');
-        let month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-        let year = date.getFullYear();
         
-        return `${day}/${month}/${year}`;
-    }
-
-
-    // Set default values in input fields
-    document.addEventListener("DOMContentLoaded", function () {
-        let now = new Date();
-        let future = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour for end time
-
-        document.getElementById("vcStartDate").value = now.toISOString().slice(0, 16);
-        document.getElementById("vcEndDate").value = future.toISOString().slice(0, 16);
-    });
-
-    // Convert before form submission
-    document.querySelector("form").addEventListener("submit", function (event) {
-        let startInput = document.getElementById("vcStartDate");
-        let endInput = document.getElementById("vcEndDate");
-
-        console.log("Formatted Start:", formatDateTime(startInput.value));
-        console.log("Formatted End:", formatDateTime(endInput.value));
-        
-        // You can send the formatted value via AJAX or store it in hidden fields
-    });
-</script>
+    
+        // Set default values in datetime input fields
+        document.addEventListener("DOMContentLoaded", function () {
+            let now = new Date();
+            let future = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour
+    
+            document.getElementById("vcStartDate").value = now.toISOString().slice(0, 16);
+            document.getElementById("vcEndDate").value = future.toISOString().slice(0, 16);
+        });
+    
+        // Example formatDateTime usage (if needed)
+        document.querySelector("form").addEventListener("submit", function (event) {
+            let startInput = document.getElementById("vcStartDate");
+            let endInput = document.getElementById("vcEndDate");
+    
+            console.log("Formatted Start:", formatDate(startInput.value));
+            console.log("Formatted End:", formatDate(endInput.value));
+            
+            // You can use these values in hidden inputs or for debugging
+        });
+    </script>
+    
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
 </body>

@@ -18,7 +18,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#reports">📊 Reports</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/daterange-report">📊 Reports</a></li>
                     <li class="nav-item"><a class="nav-link" href="#booking-list">📅 Booking List</a></li>
                     <li class="nav-item"><a class="nav-link" href="#vc-track">🎥 VC Track</a></li>
                     <li class="nav-item"><a class="nav-link" href="#cancel-requests">❌ Cancel Requests</a></li>
@@ -54,11 +54,11 @@
                 <thead>
                     <tr>
                         <th>Trans ID</th>
+                        <th>Company Name</th>
                         <th>User</th>
-                        <th>Date</th>
                         <th>Time</th> <!-- Fixed: Now using booking -->
                         <th>Comapany Name</th>     <!-- Fixed: Now using booking -->
-                        <th>VC duration</th> <!-- New column for the button -->
+                        <!-- <th>VC duration</th> New column for the button -->
                         <th>Status</th> 
                         <th>Details</th> 
                     </tr>
@@ -67,11 +67,11 @@
                     <% bookings.forEach(booking => { %> 
                         <tr>
                             <td><%= booking.bookingID %></td> <!-- Use _id for MongoDB -->
+                            <td><%= booking.companyName %></td>        <!-- Fixed: Now using booking -->
                             <td><%= booking.chairperson %></td>
                             <td><%= booking.vcStartDate %></td>
                             <td><%= booking.vcEndDate %></td>  <!-- Fixed: Now using booking -->
-                            <td><%= booking.companyName %></td>        <!-- Fixed: Now using booking -->
-                            <td><%= booking.vcDuration %></td>     <!-- Fixed: Now using booking -->
+                            <!-- <td><%= booking.vcDuration %></td>     Fixed: Now using booking -->
                             <td><span class="badge bg-info"><%= booking.status %></span></td>
                             <td>
                                 <a href="/details/<%= booking._id %>" class="btn btn-primary btn-sm">

@@ -8,7 +8,7 @@ const bookingSchema = new mongoose.Schema({
     vcPurpose: { type: String, required: true },
     department: { type: String, required: true },
     remark: { type: String },
-    vcDuration: { type: Number, required: true },
+    // vcDuration: { type: Number, required: true },
     vcType: { type: String, enum: ['audio', 'video', 'hybrid'], required: true },
     vcStartDate: { type: Date, required: true },
     vcEndDate: { type: Date, required: true },

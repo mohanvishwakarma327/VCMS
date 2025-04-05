@@ -32,7 +32,7 @@
                 <% if (bookings && bookings.length > 0) { %>
                     <% bookings.forEach(booking => { %>
                         <tr>
-                            <td><%= booking._id %></td>
+                            <td><%= booking.bookingID %></td>
                             <td><%= booking.conferenceName %></td>
                             <td><%= booking.bridgeId %></td>
                             <td><%= booking.remarks %></td>

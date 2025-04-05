@@ -1,30 +1,14 @@
-const express = require("express");
+const express = require('express');   
 const router = express.Router();
-const Booking = require("../models/Booking"); // Ensure this model exists
+const Booking = require("../models/booking"); // Ensure this model exists
 const BookingConfirmation = require("../models/BookingConfirmation");
 
-// ✅ Middleware to check if user is logged in
+// Middleware to check if user is logged in
 function isAuthenticated(req, res, next) {
     if (req.session && req.session.user) {
         return next();
     }
     res.redirect("/login");
-}
-
-// ✅ Generate a sequential booking ID starting from 200000
-async function generateSequentialBookingID() {
-    try {
-        const lastBooking = await Booking.findOne().sort({ bookingID: -1 });
-
-        if (lastBooking && lastBooking.bookingID) {
-            return Number(lastBooking.bookingID) + 1; // Increment last booking ID
-        } else {
-            return 200000; // Start from 200000 if no records exist
-        }
-    } catch (error) {
-        console.error("❌ Error generating booking ID:", error);
-        return 200000; // Fallback if an error occurs
-    }
 }
 
 // ✅ Route to render store page for store users
@@ -51,14 +35,14 @@ router.get("/store", isAuthenticated, async (req, res) => {
 // ✅ Route to handle VC booking
 router.post("/bookVC", async (req, res) => {
     try {
-        const { companyName, chairperson, designation, phone, email, bookedBy, vcPurpose, remark, vcDuration, vcStartDate, vcEndDate } = req.body;
+        const { companyName, chairperson, designation, phone, email, bookedBy, vcPurpose, remark, vcStartDate, vcEndDate } = req.body;
 
-        if (!companyName || !chairperson || !designation || !phone || !email || !bookedBy || !vcPurpose || !vcDuration || !vcStartDate || !vcEndDate) {
+        if (!companyName || !chairperson || !designation || !phone || !email || !bookedBy || !vcPurpose || !vcStartDate || !vcEndDate) {
             return res.status(400).send("❌ Missing required fields.");
         }
 
-        // Get next sequential booking ID
-        const bookingID = await generateSequentialBookingID();
+        // Generate a unique 6-digit booking ID
+        const bookingID = Math.floor(100000 + Math.random() * 900000);
 
         // Create and save new booking
         const newBooking = new Booking({
@@ -71,11 +55,10 @@ router.post("/bookVC", async (req, res) => {
             bookedBy,
             vcPurpose,
             remark,
-            vcDuration,
+            // vcDuration,
             vcStartDate,
             vcEndDate,
-            status: "Pending",
-            createdAt: new Date(),
+            status: "Pending"
         });
 
         await newBooking.save();
@@ -90,7 +73,7 @@ router.post("/bookVC", async (req, res) => {
 // ✅ Route to render booking list
 router.get("/booking-list", async (req, res) => {
     try {
-        const bookings = await Booking.find().sort({ createdAt: -1 });
+        const bookings = await Booking.find();
         res.render("booking-list", { bookings });
     } catch (error) {
         console.error("❌ Error fetching bookings:", error);
@@ -114,8 +97,7 @@ router.post("/booking/confirm", async (req, res) => {
             bridgeId,
             remarks,
             rejectionReason: status === "Rejected" ? rejectionReason : null,
-            status,
-            createdAt: new Date(),
+            status
         });
 
         await newConfirmation.save();
@@ -150,5 +132,7 @@ router.get("/confirmation", async (req, res) => {
         res.render("confirmation", { bookings: [] }); // ✅ Ensure bookings is always defined
     }
 });
+
+
 
 module.exports = router;

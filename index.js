@@ -25,14 +25,13 @@ const jwt = require('jsonwebtoken');
 const storeRoutes = require('./routes/store'); // Import store routes write on 26 march by krishna
 const vnocRoutes = require('./routes/vnoc'); // Import store routes write on 26 march by krishna
 const vcReportRoutes = require("./routes/vc-reports"); // Import VC Report Route write on 26 march by krishna
-// Ensure correct path write on 27 march by krishna
+const BookingModel = require('./models/booking'); // Ensure correct path write on 27 march by krishna
 const VCBookingModel = require('./models/vcBooking');  // Adjust path as needed
 const detailsRouter = require("./routes/details");
 const Booking = require("./models/details"); // Adjust the path as needed
 const BookingConfirmationRoutes = require("./routes/BookingConfirmation"); // Adjust the path as needed
 const confirmationsRoute = require("./routes/confirmations");
-
-
+const reportRoutes = require("./routes/reportRoutes"); // Import the report routes
 const authenticateJWT = (req, res, next) => {
     const token = req.cookies.token; // Assuming token is stored in cookies
     if (!token) return res.redirect('/login');
@@ -60,10 +59,15 @@ mongoose.connect(MONGO_URI)
 const vcms = mongoose.connection;
 
 module.exports = app;
+// Route to serve the Date Range Report page
+app.get("/daterange-report", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "daterange-report.html"));
+});
 
-//Routes Middleware
 
 // Routes
+app.use("/", reportRoutes); // Use the report routes
+app.use("/reports", reportRoutes); // Use the reports endpoint
 app.use("/store", storeRoutes); // this allows /store/confirmation to work
 app.use("/confirmations", confirmationsRoute);
 app.use(dashboardRoutes);
@@ -709,7 +713,6 @@ const vcBookingSchema = new mongoose.Schema({
     bookedBy: String,
     vcPurpose: String,
     remark: String,
-    vcDuration: Number,
     vcStartDate: Date,
     vcEndDate: Date,
     status: { type: String, default: "Pending" }
@@ -731,7 +734,7 @@ app.post("/bookVC", async (req, res) => {
             bookedBy: req.body.bookedBy,
             vcPurpose: req.body.vcPurpose,
             remark: req.body.remark,
-            vcDuration: req.body.vcDuration,
+            // vcDuration: req.body.vcDuration,
             vcStartDate: req.body.vcStartDate,
             vcEndDate: req.body.vcEndDate
         });

@@ -44,7 +44,7 @@ const BookingSchema = new mongoose.Schema({
     bookedBy: { type: String, required: true },
     vcPurpose: { type: String, required: true },
     remark: { type: String },
-    vcDuration: { type: String, required: true },
+    // vcDuration: { type: String, required: true },
     vcStartDate: { type: Date, required: true },
     vcEndDate: { type: Date, required: true },
     status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" }
