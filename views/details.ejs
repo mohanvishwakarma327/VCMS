@@ -19,6 +19,19 @@
             <div class="card-body">
                 <!-- Customer Details Table -->
                 <table class="table table-bordered">
+                    <%
+                    function formatDateTime(dateStr) {
+                        const date = new Date(dateStr);
+                        const dd = String(date.getDate()).padStart(2, '0');
+                        const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+                        const yyyy = date.getFullYear();
+                    
+                        const hh = String(date.getHours()).padStart(2, '0');
+                        const min = String(date.getMinutes()).padStart(2, '0');
+                    
+                        return `${dd}:${mm}:${yyyy} ${hh}:${min}`;
+                    }
+                    %>
                     <tr>
                         <th>Company Name </th>
                         <td><%= booking.companyName %></td>
@@ -35,13 +48,13 @@
                         <th>Contact Number</th>
                         <td><%= booking.phone %></td>
                         <th>VC Start Date Time</th>
-                        <td><%= booking.vcStartDate %></td>
+                        <td><%= formatDateTime(booking.vcStartDate) %></td>
                     </tr>
                     <tr>
                         <th>Email</th>
                         <td><%= booking.email %></td>
                         <th>VC End Date Time</th>
-                        <td><%= booking.vcEndDate %></td>
+                        <td><%= formatDateTime(booking.vcEndDate) %></td>
                     </tr>
                 </table>
 

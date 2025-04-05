@@ -51,13 +51,28 @@
         </div>
         <div class="card-body">
             <table class="table table-bordered">
+
+                <%
+function formatDateTime(dateStr) {
+    const date = new Date(dateStr);
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const yyyy = date.getFullYear();
+
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+
+    return `${dd}:${mm}:${yyyy} ${hh}:${min}`;
+}
+%>
+
                 <thead>
                     <tr>
                         <th>Trans ID</th>
                         <th>Company Name</th>
                         <th>User</th>
-                        <th>Time</th> <!-- Fixed: Now using booking -->
-                        <th>Comapany Name</th>     <!-- Fixed: Now using booking -->
+                        <th>vcStartDate</th> <!-- Fixed: Now using booking -->
+                        <th>vcEndDate</th>     <!-- Fixed: Now using booking -->
                         <!-- <th>VC duration</th> New column for the button -->
                         <th>Status</th> 
                         <th>Details</th> 
@@ -69,8 +84,9 @@
                             <td><%= booking.bookingID %></td> <!-- Use _id for MongoDB -->
                             <td><%= booking.companyName %></td>        <!-- Fixed: Now using booking -->
                             <td><%= booking.chairperson %></td>
-                            <td><%= booking.vcStartDate %></td>
-                            <td><%= booking.vcEndDate %></td>  <!-- Fixed: Now using booking -->
+                            <td><%= formatDateTime(booking.vcStartDate) %></td>
+                            <td><%= formatDateTime(booking.vcEndDate) %></td>
+                            <!-- Fixed: Now using booking -->
                             <!-- <td><%= booking.vcDuration %></td>     Fixed: Now using booking -->
                             <td><span class="badge bg-info"><%= booking.status %></span></td>
                             <td>
