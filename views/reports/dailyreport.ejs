@@ -1,80 +1,89 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Reports</title>
-    <link rel="stylesheet" href="/css/clientreport.css">
-</head>
-<body>
-    <h1>Reports</h1>
-    <div class="form-container">
-        <form id="dailyReportsForm">
-            <h2>Daily Reports</h2>
-            <label for="dailyReportDate">Select Date:</label>
-            <input type="date" id="dailyReportDate" name="dailyReportDate" required><br>
-            <input type="submit" value="Get Daily Report">
-        </form>
-    </div>
-<script>
-        document.getElementById('dailyReportsForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            alert('Fetching daily report for ' + document.getElementById('dailyReportDate').value);
-        });
-
-        document.getElementById('clientReportsForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            alert('Fetching client report for Client ID: ' + document.getElementById('clientId').value + ' for Date Range: ' + document.getElementById('clientReportDateRange').value);
-        });
-    </script>
-</body>
-</html> -->
-<!-- add on 26 march by krishna -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Reports</title>
     <link rel="stylesheet" href="/css/clientreport.css">
+    <style>
+        .btn {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .btn-outline-primary {
+            background-color: transparent;
+            color: #3498db;
+            border: 2px solid #3498db;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <h1>Reports</h1>
-    
+
     <div class="form-container">
         <form id="dailyReportsForm">
             <h2>Daily Reports</h2>
-            <label for="dailyReportDate">Select Date:</label>
-            <input type="date" id="dailyReportDate" name="dailyReportDate" required><br>
-            <input type="submit" value="Get Daily Report">
+
+            <label for="fromDate"><strong>From Date:</strong></label>
+            <input type="date" id="fromDate" name="fromDate" required><br><br>
+
+            <label for="toDate"><strong>To Date:</strong></label>
+            <input type="date" id="toDate" name="toDate" required><br><br>
+
+            <input type="submit" class="btn" value="Get Report">
+            <a id="csvExportBtn" class="btn btn-outline-primary">Download CSV</a>
         </form>
     </div>
 
     <div id="reportResults" class="report-container"></div>
+
     <script>
+        // Helper to format date to DD/MM/YYYY
+        function formatDate(rawDate) {
+            const date = new Date(rawDate);
+            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+        }
+
+        // Handle form submit
         document.getElementById("dailyReportsForm").addEventListener("submit", async function (event) {
             event.preventDefault();
-    
-            const selectedDate = document.getElementById("dailyReportDate").value;
-            if (!selectedDate) {
-                alert("Please select a date!");
+
+            const fromDate = document.getElementById("fromDate").value;
+            const toDate = document.getElementById("toDate").value;
+
+            if (!fromDate || !toDate) {
+                alert("Please select both From and To dates.");
                 return;
             }
-    
+
+            const formattedFrom = formatDate(fromDate);
+            const formattedTo = formatDate(toDate);
+
+            alert(`Fetching reports from ${formattedFrom} to ${formattedTo}`);
+
             try {
-                const response = await fetch(`/reports/daily-report?date=${selectedDate}`);
-                if (!response.ok) throw new Error("Failed to fetch reports!");
-    
+                const response = await fetch(`/reports/range?from=${formattedFrom}&to=${formattedTo}`);
+                if (!response.ok) throw new Error("Failed to fetch reports");
+
                 const reports = await response.json();
-                console.log("✅ Reports Data:", reports);
-    
+
                 const reportContainer = document.getElementById("reportResults");
-                reportContainer.innerHTML = ""; // Clear previous results
-    
+                reportContainer.innerHTML = "";
+
                 if (reports.length === 0) {
-                    reportContainer.innerHTML = "<p>No approved bookings found for the selected date.</p>";
+                    reportContainer.innerHTML = "<p>No reports found for selected range.</p>";
                     return;
                 }
-    
-                // Create a table
+
                 let tableHTML = `
                     <table border="1">
                         <tr>
@@ -86,29 +95,44 @@
                             <th>Created At</th>
                         </tr>
                 `;
-    
+
                 reports.forEach(report => {
                     tableHTML += `
                         <tr>
                             <td>${report.bookingID}</td>
                             <td>${report.conferenceName}</td>
                             <td>${report.bridgeId}</td>
-                            <td><span class="badge bg-success">${report.status}</span></td>
+                            <td>${report.status}</td>
                             <td>${report.remarks || "N/A"}</td>
                             <td>${new Date(report.createdAt).toLocaleString()}</td>
                         </tr>
                     `;
                 });
-    
-                tableHTML += `</table>`;
+
+                tableHTML += "</table>";
                 reportContainer.innerHTML = tableHTML;
-    
-            } catch (error) {
-                console.error("❌ Error fetching reports:", error);
-                document.getElementById("reportResults").innerHTML = `<p class="text-danger">Failed to load reports.</p>`;
+
+            } catch (err) {
+                console.error("❌ Error:", err);
+                document.getElementById("reportResults").innerHTML = "<p>Failed to load reports.</p>";
             }
+        });
+
+        // CSV Download Button
+        document.getElementById("csvExportBtn").addEventListener("click", function () {
+            const from = document.getElementById("fromDate").value;
+            const to = document.getElementById("toDate").value;
+
+            if (!from || !to) {
+                return alert("Please select both From and To dates before downloading.");
+            }
+
+            const formattedFrom = formatDate(from);
+            const formattedTo = formatDate(to);
+
+            // Open CSV download in new tab
+            window.open(`/reports/range-csv?from=${formattedFrom}&to=${formattedTo}`, "_blank");
         });
     </script>
 </body>
 </html>
-
