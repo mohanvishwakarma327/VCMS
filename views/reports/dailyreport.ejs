@@ -89,10 +89,11 @@
                         <tr>
                             <th>Booking ID</th>
                             <th>Conference Name</th>
-                            <th>Bridge ID</th>
+                            <!-- <th>Bridge ID</th> -->
                             <th>Status</th>
                             <th>Remarks</th>
-                            <th>Created At</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
                         </tr>
                 `;
 
@@ -101,9 +102,10 @@
                         <tr>
                             <td>${report.bookingID}</td>
                             <td>${report.conferenceName}</td>
-                            <td>${report.bridgeId}</td>
                             <td>${report.status}</td>
                             <td>${report.remarks || "N/A"}</td>
+                            <td>${report.vcStartDate ? new Date(report.vcStartDate).toLocaleString() : "N/A"}</td>
+                            <td>${report.vcEndDate ? new Date(report.vcEndDate).toLocaleString() : "N/A"}</td>
                             <td>${new Date(report.createdAt).toLocaleString()}</td>
                         </tr>
                     `;

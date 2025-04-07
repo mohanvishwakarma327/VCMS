@@ -39,6 +39,8 @@ router.get("/range-csv", async (req, res) => {
             { label: "Bridge ID", value: "bridgeId" },
             { label: "Status", value: "status" },
             { label: "Remarks", value: row => row.remarks || "N/A" },
+            { label: "Start Time", value: row => new Date(row.startTime).toLocaleString() },
+            { label: "End Time", value: row => new Date(row.endTime).toLocaleString() },
             { label: "Created At", value: row => new Date(row.createdAt).toLocaleString() }
         ];
 

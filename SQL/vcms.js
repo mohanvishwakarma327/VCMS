@@ -72,6 +72,8 @@ const BookingConfirmationSchema = new mongoose.Schema({
     remarks: { type: String }, 
     rejectionReason: { type: String },
     status: { type: String, enum: ["Accepted", "Rejected"], default: "Accepted" }, // Store booking status
+    vcStartDate: { type: Date },   // ✅ Start time of the VC
+    vcEndDate: { type: Date },     // ✅ End time of the VC
     createdAt: { type: Date, default: Date.now } 
 });
 
